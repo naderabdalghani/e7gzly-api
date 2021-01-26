@@ -1,5 +1,5 @@
 from neomodel import StructuredNode, StringProperty, EmailProperty, DateTimeProperty, DateProperty, IntegerProperty, \
-    ArrayProperty, RelationshipTo, One, UniqueIdProperty, RelationshipFrom
+    ArrayProperty, RelationshipTo, One, UniqueIdProperty, RelationshipFrom, BooleanProperty
 
 USERNAME_LEN = 50
 STADIUM_NAME_LEN = 100
@@ -109,6 +109,7 @@ class User(StructuredNode):
     city = StringProperty(required=True, choices=CITIES)
     address = StringProperty(required=False)
     role = StringProperty(required=True, choices=ROLES)
+    authorized = BooleanProperty(default=False)
     reservations = RelationshipTo('Seat', 'RESERVED_A')
 
 
