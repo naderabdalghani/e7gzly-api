@@ -35,7 +35,7 @@ TEAMS = (
 
 CITIES = (("cairo", "Cairo"),
           ("alexandria", "Alexandria"),
-          ("gizeh", "Gizeh"),
+          ("giza", "Giza"),
           ("shubra el-kheima", "Shubra El-Kheima"),
           ("port said", "Port Said"),
           ("suez", "Suez"),
