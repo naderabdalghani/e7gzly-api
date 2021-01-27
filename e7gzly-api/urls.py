@@ -15,10 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from e7gzly.views import *
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
+    path('account/login/', LoggingInView.as_view(), name='login'),
+    path('account/registration/', RegistrationView.as_view(), name='registration'),
+    path('users/', UserView.as_view(), name='users'),
+    path('users/authorize/', AuthorizationView.as_view(), name='authorization'),
+    path('matches/', MatchView.as_view(), name='matches'),
+    path('stadiums/', StadiumView.as_view(), name='stadiums'),
+    path('seats/', ReservationView.as_view(), name='reservations')
 ]
