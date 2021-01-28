@@ -34,7 +34,7 @@ config.DATABASE_URL = os.environ.get('NEO4J_BOLT_URL', 'bolt://neo4j:0123456789@
 NEOMODEL_NEO4J_BOLT_URL = os.environ.get('NEO4J_BOLT_URL', 'bolt://neo4j:0123456789@localhost:7687')
 NEOMODEL_SIGNALS = True
 NEOMODEL_FORCE_TIMEZONE = False
-NEOMODEL_ENCRYPTED_CONNECTION = True
+NEOMODEL_ENCRYPTED_CONNECTION = False
 NEOMODEL_MAX_POOL_SIZE = 50
 
 # Application definition
@@ -96,6 +96,21 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+}
+
+# drf_spectacular
+
+SPECTACULAR_SETTINGS = {
+    # available SwaggerUI configuration parameters
+    # https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+        "supportedSubmitMethods": [],
+    },
+    "TITLE": 'E7gzly Docs',
+    "VERSION": '1.0.0'
 }
 
 # Password validation
