@@ -2,7 +2,8 @@ import datetime
 from neomodel import StructuredNode, StringProperty, EmailProperty, DateTimeProperty, DateProperty, IntegerProperty, \
     ArrayProperty, RelationshipTo, One, UniqueIdProperty, RelationshipFrom, BooleanProperty
 from rest_framework.exceptions import ValidationError
-from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, SEAT_ID_MAX_LEN
+from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, SEAT_ID_MAX_LEN, \
+    STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, VIP_ROWS_MAX, VIP_SEATS_PER_ROW_MAX
 
 
 class Admin(StructuredNode):
@@ -48,6 +49,23 @@ class Stadium(StructuredNode):
     vip_seats_per_row = IntegerProperty(required=True)
     vip_rows = IntegerProperty(required=True)
     matches = RelationshipFrom("Match", "HOSTED_IN")
+
+    def save(self, *args, **kwargs):
+        if self.capacity < STADIUM_MIN_CAPACITY:
+            raise ValidationError({"capacity": "Invalid stadium capacity (less than {})".format(STADIUM_MIN_CAPACITY)})
+        if self.vip_seats_per_row < VIP_SEATS_PER_ROW_MIN:
+            raise ValidationError({"vip_seats_per_row": "Invalid number of VIP seats per row (less than {})"
+                                  .format(VIP_SEATS_PER_ROW_MIN)})
+        if self.vip_rows < VIP_ROWS_MIN:
+            raise ValidationError({"vip_rows": "Invalid number of VIP rows (less than {})"
+                                  .format(VIP_ROWS_MIN)})
+        if self.vip_seats_per_row > VIP_SEATS_PER_ROW_MAX:
+            raise ValidationError({"vip_seats_per_row": "Invalid number of VIP seats per row (more than {})"
+                                  .format(VIP_SEATS_PER_ROW_MAX)})
+        if self.vip_rows > VIP_ROWS_MAX:
+            raise ValidationError({"vip_rows": "Invalid number of VIP rows (more than {})"
+                                  .format(VIP_ROWS_MAX)})
+        super().save(*args, **kwargs)
 
 
 class Match(StructuredNode):
