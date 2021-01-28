@@ -67,6 +67,23 @@ class Stadium(StructuredNode):
                                   .format(VIP_ROWS_MAX)})
         super().save(*args, **kwargs)
 
+    def create(self, *args, **kwargs):
+        if self['capacity'] < STADIUM_MIN_CAPACITY:
+            raise ValidationError({"capacity": "Invalid stadium capacity (less than {})".format(STADIUM_MIN_CAPACITY)})
+        if self['vip_seats_per_row'] < VIP_SEATS_PER_ROW_MIN:
+            raise ValidationError({"vip_seats_per_row": "Invalid number of VIP seats per row (less than {})"
+                                  .format(VIP_SEATS_PER_ROW_MIN)})
+        if self['vip_rows'] < VIP_ROWS_MIN:
+            raise ValidationError({"vip_rows": "Invalid number of VIP rows (less than {})"
+                                  .format(VIP_ROWS_MIN)})
+        if self['vip_seats_per_row'] > VIP_SEATS_PER_ROW_MAX:
+            raise ValidationError({"vip_seats_per_row": "Invalid number of VIP seats per row (more than {})"
+                                  .format(VIP_SEATS_PER_ROW_MAX)})
+        if self['vip_rows'] > VIP_ROWS_MAX:
+            raise ValidationError({"vip_rows": "Invalid number of VIP rows (more than {})"
+                                  .format(VIP_ROWS_MAX)})
+        super().create(*args, **kwargs)
+
 
 class Match(StructuredNode):
     id = UniqueIdProperty()
