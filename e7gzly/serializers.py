@@ -4,7 +4,7 @@ from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAM
 
 
 class AdminSerializer(serializers.Serializer):
-    id = serializers.UUIDField(allow_null=False, read_only=True)
+    _id = serializers.UUIDField(allow_null=False, read_only=True)
     username = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
     email = serializers.EmailField(required=True, allow_null=False, allow_blank=False)
     password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
@@ -17,7 +17,7 @@ class AdminSerializer(serializers.Serializer):
 
 
 class UserBaseSerializer(serializers.Serializer):
-    id = serializers.UUIDField(allow_null=False, read_only=True)
+    _id = serializers.UUIDField(allow_null=False, read_only=True)
     username = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
     email = serializers.EmailField(required=True, allow_null=False, allow_blank=False)
     password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
@@ -32,7 +32,7 @@ class UserBaseSerializer(serializers.Serializer):
 
 
 class MatchBaseSerializer(serializers.Serializer):
-    id = serializers.UUIDField(allow_null=False, read_only=True)
+    _id = serializers.UUIDField(allow_null=False, read_only=True)
     home_team = serializers.ChoiceField(required=True, choices=TEAMS, allow_null=False, allow_blank=False)
     away_team = serializers.ChoiceField(required=True, choices=TEAMS, allow_null=False, allow_blank=False)
     date = serializers.DateTimeField(required=True, allow_null=False)
@@ -42,7 +42,7 @@ class MatchBaseSerializer(serializers.Serializer):
 
 
 class StadiumBaseSerializer(serializers.Serializer):
-    id = serializers.UUIDField(allow_null=False, required=True)
+    _id = serializers.UUIDField(allow_null=False, required=True)
     name = serializers.CharField(allow_null=False, allow_blank=False, max_length=STADIUM_NAME_MAX_LEN, required=True)
     capacity = serializers.IntegerField(allow_null=False, required=True)
     vip_seats_per_row = serializers.IntegerField(allow_null=False, required=True)

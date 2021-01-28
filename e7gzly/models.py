@@ -7,7 +7,7 @@ from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAM
 
 
 class Admin(StructuredNode):
-    id = UniqueIdProperty()
+    _id = UniqueIdProperty()
     username = StringProperty(required=True, max_length=NAME_MAX_LEN, unique_index=True)
     email = EmailProperty(required=True, unique_index=True)
     password = StringProperty(required=True)
@@ -27,7 +27,7 @@ class Seat(StructuredNode):
 
 
 class User(StructuredNode):
-    id = UniqueIdProperty()
+    _id = UniqueIdProperty()
     username = StringProperty(required=True, max_length=NAME_MAX_LEN, unique_index=True)
     email = EmailProperty(required=True, unique_index=True)
     password = StringProperty(required=True)
@@ -43,7 +43,7 @@ class User(StructuredNode):
 
 
 class Stadium(StructuredNode):
-    id = UniqueIdProperty()
+    _id = UniqueIdProperty()
     name = StringProperty(required=True, max_length=STADIUM_NAME_MAX_LEN, unique_index=True)
     capacity = IntegerProperty(required=True)
     vip_seats_per_row = IntegerProperty(required=True)
@@ -86,7 +86,7 @@ class Stadium(StructuredNode):
 
 
 class Match(StructuredNode):
-    id = UniqueIdProperty()
+    _id = UniqueIdProperty()
     home_team = StringProperty(required=True, choices=TEAMS)
     away_team = StringProperty(required=True, choices=TEAMS)
     date = DateTimeProperty(required=True)
