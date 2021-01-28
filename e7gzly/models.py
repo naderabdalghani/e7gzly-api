@@ -59,3 +59,13 @@ class Match(StructuredNode):
     linesmen = ArrayProperty(StringProperty(max_length=NAME_MAX_LEN), required=True)
     match_venue = RelationshipTo('Stadium', 'HOSTED_IN', cardinality=One)
     seats = RelationshipFrom("Seat", "FOR")
+
+    def save(self, *args, **kwargs):
+        if self.home_team == self.away_team:
+            raise ValidationError({"away_team": "Away team cannot be the same as the home team"})
+        if self.date < datetime.datetime.now():
+            raise ValidationError({"date": "Only future match events are allowed to be added"})
+        if len(self.linesmen) < 2:
+            raise ValidationError({"linesmen": "There should be at least 2 linesmen for a single match"})
+        super().save(*args, **kwargs)
+
