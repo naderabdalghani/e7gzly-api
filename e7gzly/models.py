@@ -87,3 +87,12 @@ class Match(StructuredNode):
             raise ValidationError({"linesmen": "There should be at least 2 linesmen for a single match"})
         super().save(*args, **kwargs)
 
+    def create(self, *args, **kwargs):
+        if self['home_team'] == self['away_team']:
+            raise ValidationError({"away_team": "Away team cannot be the same as the home team"})
+        if self['date'] < datetime.datetime.now():
+            raise ValidationError({"date": "Only future match events are allowed to be added"})
+        if len(self['linesmen']) < 2:
+            raise ValidationError({"linesmen": "There should be at least 2 linesmen for a single match"})
+        super().create(*args, **kwargs)
+
