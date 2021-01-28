@@ -1,6 +1,13 @@
+import datetime
+
+from django.utils import timezone
+from django.utils.timezone import utc
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, \
-    SEAT_ID_MAX_LEN, ADDRESS_MAX_LEN
+    SEAT_ID_MAX_LEN, ADDRESS_MAX_LEN, STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, VIP_SEATS_PER_ROW_MAX, \
+    VIP_ROWS_MAX, DATETIME_FORMAT
 
 
 class AdminSerializer(serializers.Serializer):
@@ -40,6 +47,17 @@ class MatchBaseSerializer(serializers.Serializer):
     linesmen = serializers.ListField(required=True, child=serializers.CharField(allow_null=False, allow_blank=False,
                                                                                 max_length=NAME_MAX_LEN), min_length=2)
 
+    def validate(self, data):
+        if not isinstance(data['date'], datetime.datetime):
+            data['date'] = datetime.datetime.strptime(data['date'], DATETIME_FORMAT)
+        if data['home_team'] == data['away_team']:
+            raise ValidationError({"away_team": "Away team cannot be the same as the home team"})
+        if data['date'] < timezone.now():
+            raise ValidationError({"date": "Only future match events are allowed to be added"})
+        if len(data['linesmen']) < 2:
+            raise ValidationError({"linesmen": "There should be at least 2 linesmen for a single match"})
+        return data
+
 
 class StadiumBaseSerializer(serializers.Serializer):
     _id = serializers.UUIDField(allow_null=False, required=True)
@@ -47,6 +65,23 @@ class StadiumBaseSerializer(serializers.Serializer):
     capacity = serializers.IntegerField(allow_null=False, required=True)
     vip_seats_per_row = serializers.IntegerField(allow_null=False, required=True)
     vip_rows = serializers.IntegerField(allow_null=False, required=True)
+
+    def validate(self, data):
+        if data['capacity'] < STADIUM_MIN_CAPACITY:
+            raise ValidationError({"capacity": "Invalid stadium capacity (less than {})".format(STADIUM_MIN_CAPACITY)})
+        if data['vip_seats_per_row'] < VIP_SEATS_PER_ROW_MIN:
+            raise ValidationError({"vip_seats_per_row": "Invalid number of VIP seats per row (less than {})"
+                                  .format(VIP_SEATS_PER_ROW_MIN)})
+        if data['vip_rows'] < VIP_ROWS_MIN:
+            raise ValidationError({"vip_rows": "Invalid number of VIP rows (less than {})"
+                                  .format(VIP_ROWS_MIN)})
+        if data['vip_seats_per_row'] > VIP_SEATS_PER_ROW_MAX:
+            raise ValidationError({"vip_seats_per_row": "Invalid number of VIP seats per row (more than {})"
+                                  .format(VIP_SEATS_PER_ROW_MAX)})
+        if data['vip_rows'] > VIP_ROWS_MAX:
+            raise ValidationError({"vip_rows": "Invalid number of VIP rows (more than {})"
+                                  .format(VIP_ROWS_MAX)})
+        return data
 
 
 class SeatBaseSerializer(serializers.Serializer):

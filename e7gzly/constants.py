@@ -8,6 +8,7 @@ VIP_ROWS_MIN = 1
 VIP_SEATS_PER_ROW_MAX = 50
 VIP_ROWS_MAX = 20
 ADDRESS_MAX_LEN = 200
+DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 GENDERS = (
     ('male', 'Male'),
