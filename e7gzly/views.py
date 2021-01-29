@@ -154,11 +154,57 @@ class MatchView(APIView):
         match.match_venue.connect(stadium)
         return Response(data=MatchSerializer(match).data, status=status.HTTP_201_CREATED)
 
-    def patch(self, request):
+    @extend_schema(
+        responses={
+            status.HTTP_200_OK: None,
+            status.HTTP_400_BAD_REQUEST: generate_custom_response_serializer({'<bad_field>': '<description>'}),
+            status.HTTP_404_NOT_FOUND: generate_custom_response_serializer({
+                "<entity_id>": "There is no <entity> with the given id"
+            })
+        },
+        examples=[
+            OpenApiExample(
+                name='Example',
+                request_only=True,
+                value={
+                    "_id": "d6752d6d819a41cd8055cadee4d969b4",
+                    "home_team": "pyramids fc",
+                    "away_team": "zamalek sc",
+                    "date": "2021-03-19T07:00:00Z",
+                    "referee": "Mohammad Abdo",
+                    "linesmen": [
+                        "Tyler Charlie",
+                        "Hogan McDonald"
+                    ],
+                    "match_venue": "ef61a925c45342b99a683eab31d26602"
+                }
+            )
+        ]
+    )
+    def put(self, request):
         """
         Update the details of an existing match
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        match_id = request.data.pop('_id', None)
+        if match_id is None:
+            return Response(data={"_id": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
+        stadium_id = request.data.pop('match_venue', None)
+        if stadium_id is None:
+            return Response(data={"match_venue": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = MatchBaseSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        match = Match.nodes.get_or_none(_id=match_id)
+        if match is None:
+            return Response(data={"_id": ["There is no match with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        stadium = Stadium.nodes.get_or_none(_id=stadium_id)
+        if stadium is None:
+            return Response(data={"match_venue": ["There is no stadium with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        match = match.update(serializer.validated_data)
+        match.match_venue.reconnect(match.match_venue.single(), stadium)
+        return Response(status=status.HTTP_200_OK)
 
 
 class StadiumView(APIView):
