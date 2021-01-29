@@ -1,9 +1,7 @@
-import datetime
 from neomodel import StructuredNode, StringProperty, EmailProperty, DateTimeProperty, DateProperty, IntegerProperty, \
     ArrayProperty, RelationshipTo, One, UniqueIdProperty, RelationshipFrom, BooleanProperty
-from rest_framework.exceptions import ValidationError
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, SEAT_ID_MAX_LEN, \
-    STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, VIP_ROWS_MAX, VIP_SEATS_PER_ROW_MAX, ADDRESS_MAX_LEN
+    ADDRESS_MAX_LEN
 
 
 class Admin(StructuredNode):
