@@ -144,11 +144,11 @@ class MatchView(APIView):
         serializer = MatchBaseSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        match = Match.create(serializer.validated_data)[0]
         stadium = Stadium.nodes.get_or_none(_id=stadium_id)
         if stadium is None:
-            return Response(data={"match_venue": ["There is no stadium with the given _id"]},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"match_venue": ["There is no stadium with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        match = Match.create(serializer.validated_data)[0]
         match.match_venue.connect(stadium)
         return Response(data=MatchSerializer(match).data, status=status.HTTP_201_CREATED)
 
