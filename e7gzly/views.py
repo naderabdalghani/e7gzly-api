@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Match, Stadium
 from .constants import MATCHES_PER_PAGE
-from .serializers import MatchSerializer, MatchBaseSerializer, CustomResponseSerializer
+from .serializers import MatchSerializer, MatchBaseSerializer, generate_custom_response_serializer
 
 
 class RegistrationView(APIView):
@@ -31,8 +31,7 @@ class MatchView(APIView):
         parameters=[
             OpenApiParameter(name='matches_per_page', description='Defaults to {}'.format(MATCHES_PER_PAGE),
                              required=False, type=int),
-            OpenApiParameter(name='page_number', description='Defaults to {}'.format(1),
-                             required=False, type=int)
+            OpenApiParameter(name='page_number', description='Defaults to {}'.format(1), required=False, type=int)
         ],
         responses={status.HTTP_200_OK: MatchSerializer(many=True)},
         examples=[
@@ -91,7 +90,10 @@ class MatchView(APIView):
     @extend_schema(
         responses={
             status.HTTP_201_CREATED: MatchSerializer(),
-            status.HTTP_400_BAD_REQUEST: CustomResponseSerializer({'<bad_field>': '<description>'})
+            status.HTTP_400_BAD_REQUEST: generate_custom_response_serializer({'<bad_field>': '<description>'}),
+            status.HTTP_404_NOT_FOUND: generate_custom_response_serializer({
+                "match_venue": "There is no stadium with the given id"
+            })
         },
         examples=[
             OpenApiExample(
