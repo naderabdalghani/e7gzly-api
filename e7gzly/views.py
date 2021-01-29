@@ -1,12 +1,11 @@
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Admin, User, Match, Seat, Stadium
+from .models import Match, Stadium
 from .constants import MATCHES_PER_PAGE
-from .serializers import MatchSerializer
+from .serializers import MatchSerializer, MatchBaseSerializer, CustomResponseSerializer
 
 
 class RegistrationView(APIView):
@@ -38,11 +37,11 @@ class MatchView(APIView):
         responses={status.HTTP_200_OK: MatchSerializer(many=True)},
         examples=[
             OpenApiExample(
-                name='Example #1',
+                name='Example',
                 description='Array of retrieved matches',
                 value=[
                     {
-                        "id": "9",
+                        "_id": "f23da8a82a4e4baf938e6f03445e7f51",
                         "home_team": "pyramids fc",
                         "away_team": "smouha sc",
                         "date": "2020-10-13T03:10:11Z",
@@ -52,7 +51,7 @@ class MatchView(APIView):
                             "Hogan Slayton"
                         ],
                         "match_venue": {
-                            "id": "1212",
+                            "_id": "7b4d0bb5ceb649f087f7a90a497b34f9",
                             "name": "Sohag Stadium",
                             "capacity": 16000,
                             "vip_seats_per_row": 28,
@@ -89,11 +88,69 @@ class MatchView(APIView):
         matches = MatchSerializer(matches, many=True).data
         return Response(data=matches, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        responses={
+            status.HTTP_201_CREATED: MatchSerializer(),
+            status.HTTP_400_BAD_REQUEST: CustomResponseSerializer({'<bad_field>': '<description>'})
+        },
+        examples=[
+            OpenApiExample(
+                name='Example',
+                request_only=True,
+                value={
+                    "home_team": "pyramids fc",
+                    "away_team": "al ahly sc",
+                    "date": "2021-03-19T07:00:00Z",
+                    "referee": "Mohammad Abdo",
+                    "linesmen": [
+                        "Tyler Charlie",
+                        "Hogan McDonald"
+                    ],
+                    "match_venue": "4e6cc1704b38499eb36ec29086d46c48"
+                }
+            ),
+            OpenApiExample(
+                name='Example',
+                response_only=True,
+                value={
+                    "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "home_team": "pyramids fc",
+                    "away_team": "al ahly sc",
+                    "date": "2021-03-19T07:00:00Z",
+                    "referee": "Mohammad Abdo",
+                    "linesmen": [
+                        "Tyler Charlie",
+                        "Hogan McDonald"
+                    ],
+                    "match_venue": {
+                        "_id": "4e6cc1704b38499eb36ec29086d46c48",
+                        "name": "Borg El Arab Stadium",
+                        "vip_rows": 20,
+                        "vip_seats_per_row": 10,
+                        "capacity": 86000
+                    },
+                    "seats": []
+                },
+            )
+        ]
+    )
     def post(self, request):
         """
         Create a new match event
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        stadium_id = request.data.pop('match_venue', None)
+        if stadium_id is None:
+            return Response(data={"match_venue": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = MatchBaseSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        match = Match.create(serializer.validated_data)[0]
+        stadium = Stadium.nodes.get_or_none(_id=stadium_id)
+        if stadium is None:
+            return Response(data={"match_venue": ["There is no stadium with the given _id"]},
+                            status=status.HTTP_400_BAD_REQUEST)
+        match.match_venue.connect(stadium)
+        return Response(data=MatchSerializer(match).data, status=status.HTTP_201_CREATED)
 
     def patch(self, request):
         """
