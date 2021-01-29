@@ -130,7 +130,17 @@ class SeatSerializer(SeatBaseSerializer):
 
 
 class CustomResponseSerializer(serializers.Serializer):
+    generated_class_id = 0
+
     def __init__(self, example):
         for field, value in example.items():
             self.fields[field] = serializers.ChoiceField([value])
         super().__init__()
+
+
+def generate_custom_response_serializer(example):
+    generated_class = type("CustomResponseSerializer" + str(CustomResponseSerializer.generated_class_id),
+                           (CustomResponseSerializer,),
+                           {})
+    CustomResponseSerializer.generated_class_id += 1
+    return generated_class(example)
