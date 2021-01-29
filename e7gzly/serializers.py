@@ -127,3 +127,10 @@ class SeatSerializer(SeatBaseSerializer):
         instance.user = instance.user.single()
         new_representation = super().to_representation(instance)
         return new_representation
+
+
+class CustomResponseSerializer(serializers.Serializer):
+    def __init__(self, example):
+        for field, value in example.items():
+            self.fields[field] = serializers.ChoiceField([value])
+        super().__init__()
