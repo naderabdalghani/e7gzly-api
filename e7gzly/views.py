@@ -1,10 +1,13 @@
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
+from neomodel import UniqueProperty
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Match, Stadium
+from .models import Match, Stadium, User, Token
 from .constants import MATCHES_PER_PAGE
-from .serializers import MatchSerializer, MatchBaseSerializer
+from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, LoginDataSerializer
+from django.contrib.auth.hashers import make_password, check_password
 
 
 class RegistrationView(APIView):
@@ -12,7 +15,19 @@ class RegistrationView(APIView):
         """
         Register a new unauthorized user
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK, )
+        serializer = UserBaseSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user_data = serializer.validated_data
+        user_data['password'] = make_password(user_data['password'])
+        try:
+            user = User.create(user_data)[0]
+            return Response(data=UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        except UniqueProperty as e:
+            if 'username' in e.message:
+                return Response(data="A user with the given username already exists", status=status.HTTP_409_CONFLICT)
+            if 'email' in e.message:
+                return Response(data="A user with the given email already exists", status=status.HTTP_409_CONFLICT)
 
 
 class AuthorizationView(APIView):
@@ -127,12 +142,28 @@ class ReservationView(APIView):
         return Response('Temporary Data', status=status.HTTP_200_OK)
 
 
-class LoggingInView(APIView):
-    def post(self, request):
+class LoggingInView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
         """
         Authenticate a user and provide an access token
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = LoginDataSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+        try:
+            user = User.nodes.get(username=username)
+        except User.DoesNotExist:
+            return Response(data="Incorrect credentials", status=status.HTTP_401_UNAUTHORIZED)
+        if not check_password(password, user.password):
+            return Response(data="Incorrect credentials", status=status.HTTP_401_UNAUTHORIZED)
+        token = user.token.single()
+        if token is not None:
+            token.delete()
+        token = Token().create({})[0].save()
+        user.token.connect(token)
+        return Response(data={'token': token.key}, status=status.HTTP_200_OK)
 
 
 class UserView(APIView):
