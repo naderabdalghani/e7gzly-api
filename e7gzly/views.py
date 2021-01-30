@@ -1,11 +1,10 @@
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Match, Stadium
 from .constants import MATCHES_PER_PAGE
-from .serializers import MatchSerializer, MatchBaseSerializer, generate_custom_response_serializer
+from .serializers import MatchSerializer, MatchBaseSerializer
 
 
 class RegistrationView(APIView):
@@ -27,46 +26,6 @@ class AuthorizationView(APIView):
 class MatchView(APIView):
     serializer_class = MatchSerializer
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='matches_per_page', description='Defaults to {}'.format(MATCHES_PER_PAGE),
-                             required=False, type=int),
-            OpenApiParameter(name='page_number', description='Defaults to {}'.format(1), required=False, type=int)
-        ],
-        responses={status.HTTP_200_OK: MatchSerializer(many=True)},
-        examples=[
-            OpenApiExample(
-                name='Example',
-                description='Array of retrieved matches',
-                value=[
-                    {
-                        "_id": "f23da8a82a4e4baf938e6f03445e7f51",
-                        "home_team": "pyramids fc",
-                        "away_team": "smouha sc",
-                        "date": "2020-10-13T03:10:11Z",
-                        "referee": "Damian Aiken",
-                        "linesmen": [
-                            "Tyler Rowberry",
-                            "Hogan Slayton"
-                        ],
-                        "match_venue": {
-                            "_id": "7b4d0bb5ceb649f087f7a90a497b34f9",
-                            "name": "Sohag Stadium",
-                            "capacity": 16000,
-                            "vip_seats_per_row": 28,
-                            "vip_rows": 17
-                        },
-                        "seats": [
-                            {
-                                "ticket_id": "01a467324e60460089e38da2e4aaf9fe",
-                                "seat_id": "A4"
-                            }
-                        ]
-                    }
-                ],
-            ),
-        ]
-    )
     def get(self, request):
         """
         Retrieve a list of matches
@@ -87,55 +46,6 @@ class MatchView(APIView):
         matches = MatchSerializer(matches, many=True).data
         return Response(data=matches, status=status.HTTP_200_OK)
 
-    @extend_schema(
-        responses={
-            status.HTTP_201_CREATED: MatchSerializer(),
-            status.HTTP_400_BAD_REQUEST: generate_custom_response_serializer({'<bad_field>': '<description>'}),
-            status.HTTP_404_NOT_FOUND: generate_custom_response_serializer({
-                "match_venue": "There is no stadium with the given id"
-            })
-        },
-        examples=[
-            OpenApiExample(
-                name='Example',
-                request_only=True,
-                value={
-                    "home_team": "pyramids fc",
-                    "away_team": "al ahly sc",
-                    "date": "2021-03-19T07:00:00Z",
-                    "referee": "Mohammad Abdo",
-                    "linesmen": [
-                        "Tyler Charlie",
-                        "Hogan McDonald"
-                    ],
-                    "match_venue": "4e6cc1704b38499eb36ec29086d46c48"
-                }
-            ),
-            OpenApiExample(
-                name='Example',
-                response_only=True,
-                value={
-                    "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                    "home_team": "pyramids fc",
-                    "away_team": "al ahly sc",
-                    "date": "2021-03-19T07:00:00Z",
-                    "referee": "Mohammad Abdo",
-                    "linesmen": [
-                        "Tyler Charlie",
-                        "Hogan McDonald"
-                    ],
-                    "match_venue": {
-                        "_id": "4e6cc1704b38499eb36ec29086d46c48",
-                        "name": "Borg El Arab Stadium",
-                        "vip_rows": 20,
-                        "vip_seats_per_row": 10,
-                        "capacity": 86000
-                    },
-                    "seats": []
-                },
-            )
-        ]
-    )
     def post(self, request):
         """
         Create a new match event
@@ -154,33 +64,6 @@ class MatchView(APIView):
         match.match_venue.connect(stadium)
         return Response(data=MatchSerializer(match).data, status=status.HTTP_201_CREATED)
 
-    @extend_schema(
-        responses={
-            status.HTTP_200_OK: None,
-            status.HTTP_400_BAD_REQUEST: generate_custom_response_serializer({'<bad_field>': '<description>'}),
-            status.HTTP_404_NOT_FOUND: generate_custom_response_serializer({
-                "<entity_id>": "There is no <entity> with the given id"
-            })
-        },
-        examples=[
-            OpenApiExample(
-                name='Example',
-                request_only=True,
-                value={
-                    "_id": "d6752d6d819a41cd8055cadee4d969b4",
-                    "home_team": "pyramids fc",
-                    "away_team": "zamalek sc",
-                    "date": "2021-03-19T07:00:00Z",
-                    "referee": "Mohammad Abdo",
-                    "linesmen": [
-                        "Tyler Charlie",
-                        "Hogan McDonald"
-                    ],
-                    "match_venue": "ef61a925c45342b99a683eab31d26602"
-                }
-            )
-        ]
-    )
     def put(self, request):
         """
         Update the details of an existing match

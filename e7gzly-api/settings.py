@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_spectacular',
     'rest_framework',
     'e7gzly.apps.E7gzlyConfig'
 ]
@@ -96,21 +95,6 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
-}
-
-# drf_spectacular
-
-SPECTACULAR_SETTINGS = {
-    # available SwaggerUI configuration parameters
-    # https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
-    "SWAGGER_UI_SETTINGS": {
-        "deepLinking": True,
-        "persistAuthorization": True,
-        "displayOperationId": True,
-        "supportedSubmitMethods": [],
-    },
-    "TITLE": 'E7gzly Docs',
-    "VERSION": '1.0.0'
 }
 
 # Password validation
