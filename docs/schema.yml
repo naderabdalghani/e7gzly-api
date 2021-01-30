@@ -1,0 +1,421 @@
+openapi: 3.0.3
+info:
+  title: E7gzly Docs
+  version: 1.0.0
+paths:
+  /account/login/:
+    post:
+      operationId: account_login_create
+      description: Authenticate a user and provide an access token
+      tags:
+      - account
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /account/registration/:
+    post:
+      operationId: account_registration_create
+      description: Register a new unauthorized user
+      tags:
+      - account
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /matches/:
+    get:
+      operationId: get_matches
+      description: Retrieve a list of matches
+      parameters:
+      - in: query
+        name: matches_per_page
+        schema:
+          type: integer
+          default: 20
+      - in: query
+        name: page_number
+        schema:
+          type: integer
+          default: 1
+      tags:
+      - Matches
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+              example:
+              - _id: f23da8a82a4e4baf938e6f03445e7f51
+                home_team: pyramids fc
+                away_team: smouha sc
+                date: '2020-10-13T03:10:11Z'
+                referee: Damian Aiken
+                linesmen:
+                - Tyler Rowberry
+                - Hogan Slayton
+                match_venue:
+                  _id: 7b4d0bb5ceb649f087f7a90a497b34f9
+                  name: Sohag Stadium
+                  capacity: 16000
+                  vip_seats_per_row: 28
+                  vip_rows: 17
+                seats:
+                - ticket_id: 01a467324e60460089e38da2e4aaf9fe
+                  seat_id: A4
+          description: Array of retrieved matches
+    post:
+      operationId: create_match
+      description: Create a new match event
+      tags:
+      - Matches
+      security:
+      - TokenAuthentication: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Match'
+            example:
+              home_team: pyramids fc
+              away_team: al ahly sc
+              date: '2021-03-19T07:00:00Z'
+              referee: Mohammad Abdo
+              linesmen:
+              - Tyler Charlie
+              - Hogan McDonald
+              match_venue: 4e6cc1704b38499eb36ec29086d46c48
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+              example:
+                _id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                home_team: pyramids fc
+                away_team: al ahly sc
+                date: '2021-03-19T07:00:00Z'
+                referee: Mohammad Abdo
+                linesmen:
+                - Tyler Charlie
+                - Hogan McDonald
+                match_venue:
+                  _id: 4e6cc1704b38499eb36ec29086d46c48
+                  name: Borg El Arab Stadium
+                  vip_rows: 20
+                  vip_seats_per_row: 10
+                  capacity: 86000
+                seats: []
+          description: 'Added match'
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: string
+                example:
+                  away_team: This field is required
+          description: 'Bad request'
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match_venue:
+                    type: string
+                    example: There is no stadium with the given id
+          description: "Given stadium id doesn't exist"
+    put:
+      operationId: update_match
+      description: Update the details of an existing match
+      tags:
+      - Matches
+      security:
+      - TokenAuthentication: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Match'
+            example:
+              _id: d6752d6d819a41cd8055cadee4d969b4
+              home_team: pyramids fc
+              away_team: zamalek sc
+              date: '2021-03-19T07:00:00Z'
+              referee: Mohammad Abdo
+              linesmen:
+              - Tyler Charlie
+              - Hogan McDonald
+              match_venue: ef61a925c45342b99a683eab31d26602
+        required: true
+      responses:
+        '200':
+          description: Match updated successfully
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: string
+                example:
+                  away_team: This field is required
+          description: 'Bad request'
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: There is no match with the given id
+          description: "Given match/stadium id doesn't exist"
+  /seats/:
+    get:
+      operationId: seats_retrieve
+      description: Retrieve vacant/reserved seats for a match
+      tags:
+      - seats
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: seats_create
+      description: Reserve a vacant seat for a match
+      tags:
+      - seats
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: seats_destroy
+      description: Cancel a seat reservation
+      tags:
+      - seats
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /stadiums/:
+    get:
+      operationId: stadiums_retrieve
+      description: Retrieve a list of stadiums
+      tags:
+      - stadiums
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: stadiums_create
+      description: Create a new stadium
+      tags:
+      - stadiums
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /users/:
+    get:
+      operationId: users_retrieve
+      description: Retrieve a list of users
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: users_partial_update
+      description: Update an existing user
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: users_destroy
+      description: Delete an existing user
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /users/authorize/:
+    patch:
+      operationId: users_authorize_partial_update
+      description: Authorize a user
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  securitySchemes:
+    TokenAuthentication:
+      type: http
+      scheme: bearer
+      # bearerFormat: JWT
+  schemas:
+    HomeTeamEnum:
+      enum:
+      - al ahly sc
+      - zamalek sc
+      - el gouna fc
+      - al masry sc
+      - pyramids fc
+      - enppi sc
+      - misr lel makkasa sc
+      - ceramica cleopatra fc
+      - smouha sc
+      - national bank of egypt sc
+      - ghazl el mahalla sc
+      - al ittihad alexandria club
+      - aswan sc
+      - ismaily sc
+      - tala'ea el gaish sc
+      - al mokawloon al arab sc
+      - wadi degla sc
+      - el entag el harby sc
+      type: string
+    AwayTeamEnum:
+      enum:
+      - zamalek sc
+      - al ahly sc
+      - el gouna fc
+      - al masry sc
+      - pyramids fc
+      - enppi sc
+      - misr lel makkasa sc
+      - ceramica cleopatra fc
+      - smouha sc
+      - national bank of egypt sc
+      - ghazl el mahalla sc
+      - al ittihad alexandria club
+      - aswan sc
+      - ismaily sc
+      - tala'ea el gaish sc
+      - al mokawloon al arab sc
+      - wadi degla sc
+      - el entag el harby sc
+      type: string
+    Match:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+          readOnly: true
+        home_team:
+          $ref: '#/components/schemas/HomeTeamEnum'
+        away_team:
+          $ref: '#/components/schemas/AwayTeamEnum'
+        date:
+          type: string
+          format: date-time
+        referee:
+          type: string
+          maxLength: 50
+        linesmen:
+          type: array
+          items:
+            type: string
+          minItems: 2
+        match_venue:
+          allOf:
+          - $ref: '#/components/schemas/StadiumBase'
+          readOnly: true
+        seats:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeatBase'
+          readOnly: true
+      required:
+      - _id
+      - away_team
+      - date
+      - home_team
+      - linesmen
+      - match_venue
+      - referee
+    SeatBase:
+      type: object
+      properties:
+        ticket_id:
+          type: string
+          format: uuid
+        seat_id:
+          type: string
+          maxLength: 20
+      required:
+      - seat_id
+      - ticket_id
+    StadiumBase:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        capacity:
+          type: integer
+        vip_seats_per_row:
+          type: integer
+        vip_rows:
+          type: integer
+      required:
+      - _id
+      - capacity
+      - name
+      - vip_rows
+      - vip_seats_per_row
