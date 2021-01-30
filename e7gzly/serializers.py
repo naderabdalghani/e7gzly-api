@@ -1,7 +1,6 @@
 import datetime
 
 from django.utils import timezone
-from django.utils.timezone import utc
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -22,7 +21,12 @@ class UserBaseSerializer(serializers.Serializer):
     city = serializers.ChoiceField(required=True, choices=CITIES, allow_null=False, allow_blank=False)
     address = serializers.CharField(required=False, allow_null=True, allow_blank=False, max_length=ADDRESS_MAX_LEN)
     role = serializers.ChoiceField(required=True, choices=ROLES, allow_null=False, allow_blank=False)
-    authorized = serializers.BooleanField(required=True, allow_null=False)
+    authorized = serializers.BooleanField(allow_null=False, read_only=True)
+
+    def validate(self, data):
+        if data['role'] == 'admin':
+            raise ValidationError({"role": "Cannot create a user with the given role"})
+        return data
 
 
 class MatchBaseSerializer(serializers.Serializer):
