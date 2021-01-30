@@ -4,19 +4,6 @@ from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAM
     ADDRESS_MAX_LEN
 
 
-class Admin(StructuredNode):
-    _id = UniqueIdProperty()
-    username = StringProperty(required=True, max_length=NAME_MAX_LEN, unique_index=True)
-    email = EmailProperty(required=True, unique_index=True)
-    password = StringProperty(required=True)
-    first_name = StringProperty(required=True)
-    last_name = StringProperty(required=True)
-    birthdate = DateProperty(required=True)
-    gender = StringProperty(required=True, choices=GENDERS)
-    city = StringProperty(required=True, choices=CITIES)
-    address = StringProperty(required=False)
-
-
 class Seat(StructuredNode):
     ticket_id = UniqueIdProperty()
     seat_id = StringProperty(required=True, max_length=SEAT_ID_MAX_LEN)

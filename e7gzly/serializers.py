@@ -10,19 +10,6 @@ from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAM
     VIP_ROWS_MAX, DATETIME_FORMAT
 
 
-class AdminSerializer(serializers.Serializer):
-    _id = serializers.UUIDField(allow_null=False, read_only=True)
-    username = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
-    email = serializers.EmailField(required=True, allow_null=False, allow_blank=False)
-    password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
-    first_name = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
-    last_name = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
-    birthdate = serializers.DateField(required=True, allow_null=False)
-    gender = serializers.ChoiceField(required=True, choices=GENDERS, allow_null=False, allow_blank=False)
-    city = serializers.ChoiceField(required=True, choices=CITIES, allow_null=False, allow_blank=False)
-    address = serializers.CharField(required=False, allow_null=True, allow_blank=False, max_length=ADDRESS_MAX_LEN)
-
-
 class UserBaseSerializer(serializers.Serializer):
     _id = serializers.UUIDField(allow_null=False, read_only=True)
     username = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)

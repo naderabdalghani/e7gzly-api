@@ -18,7 +18,8 @@ GENDERS = (
 
 ROLES = (
     ('manager', 'Manager'),
-    ('fan', 'Fan')
+    ('fan', 'Fan'),
+    ('admin', 'Admin')
 )
 
 TEAMS = (
