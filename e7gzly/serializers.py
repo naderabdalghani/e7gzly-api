@@ -118,3 +118,8 @@ class SeatSerializer(SeatBaseSerializer):
         instance.user = instance.user.single()
         new_representation = super().to_representation(instance)
         return new_representation
+
+
+class LoginDataSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True, allow_null=False, allow_blank=False)
+    password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
