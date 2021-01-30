@@ -1,7 +1,9 @@
+import binascii
+import os
 from neomodel import StructuredNode, StringProperty, EmailProperty, DateTimeProperty, DateProperty, IntegerProperty, \
-    ArrayProperty, RelationshipTo, One, UniqueIdProperty, RelationshipFrom, BooleanProperty
+    ArrayProperty, RelationshipTo, One, ZeroOrOne, UniqueIdProperty, RelationshipFrom, BooleanProperty
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, SEAT_ID_MAX_LEN, \
-    ADDRESS_MAX_LEN
+    ADDRESS_MAX_LEN, TOKEN_MAX_LEN
 
 
 class Seat(StructuredNode):
@@ -25,6 +27,7 @@ class User(StructuredNode):
     role = StringProperty(required=True, choices=ROLES)
     authorized = BooleanProperty(default=False)
     reservations = RelationshipTo('Seat', 'RESERVED_A')
+    token = RelationshipTo('Token', 'BEARS_A', cardinality=ZeroOrOne)
 
 
 class Stadium(StructuredNode):
@@ -63,3 +66,20 @@ class Match(StructuredNode):
                 query += "SET n:`{0}`\n".format(label)
             self.cypher(query, params)
         return self
+
+
+class Token(StructuredNode):
+    key = StringProperty(max_length=TOKEN_MAX_LEN, unique_index=True)
+    created = DateTimeProperty(default_now=True)
+    user = RelationshipFrom('User', 'BEARS_A', cardinality=One)
+
+    def __init__(self, *args, **kwargs):
+        kwargs["key"] = self.generate_key()
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def generate_key(cls):
+        return binascii.hexlify(os.urandom(20)).decode()
+
+    def __str__(self):
+        return self.key
