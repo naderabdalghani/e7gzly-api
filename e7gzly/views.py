@@ -4,9 +4,11 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_condition import And, Or
 from .models import Match, Stadium, User, Token
 from .constants import MATCHES_PER_PAGE
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, LoginDataSerializer
+from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -39,7 +41,8 @@ class AuthorizationView(APIView):
 
 
 class MatchView(APIView):
-    serializer_class = MatchSerializer
+    permission_classes = [Or(And(IsReadOnlyRequest),
+                             And(Or(IsPostRequest, IsPutRequest), And(IsManager, IsAuthorized)))]
 
     def get(self, request):
         """
