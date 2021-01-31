@@ -62,10 +62,10 @@ class MatchView(APIView):
         Retrieve a list of matches
         """
         try:
-            matches_per_page = int(request.GET.get('matches_per_page', MATCHES_PER_PAGE))
+            matches_per_page = int(request.query_params.get('matches_per_page', MATCHES_PER_PAGE))
         except ValueError:
             matches_per_page = MATCHES_PER_PAGE
-        page_number = request.GET.get('page_number', 1)
+        page_number = request.query_params.get('page_number', 1)
         matches = Match.nodes
         paginator = Paginator(matches, matches_per_page)
         try:
