@@ -157,7 +157,25 @@ class ReservationView(APIView):
         """
         Reserve a vacant seat for a match
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = SeatReservationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        match_id = serializer.validated_data['match_id']
+        seat_id = serializer.validated_data['seat_id']
+        try:
+            match = Match.nodes.get(_id=match_id.hex)
+        except Match.DoesNotExist:
+            return Response(data={"match_id": ["There is no match with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        if not match.match_venue.single().is_valid_seat(seat_id):
+            return Response(data={"seat_id": ["Invalid seat_id"]}, status=status.HTTP_400_BAD_REQUEST)
+        if not match.is_available_seat(seat_id):
+            return Response(data={"seat_id": ["Seat already reserved"]}, status=status.HTTP_409_CONFLICT)
+        seat = Seat(seat_id=seat_id).save()
+        user = request.user
+        user.reservations.connect(seat)
+        seat.match.connect(match)
+        return Response(data=SeatSerializer(seat).data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
         """
