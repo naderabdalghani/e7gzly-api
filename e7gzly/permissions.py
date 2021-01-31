@@ -50,6 +50,13 @@ class IsFan(BasePermission):
         return request.user.role == "fan"
 
 
+class IsUser(BasePermission):
+    def has_permission(self, request, view):
+        if type(request.user) is not User:
+            raise NotAuthenticated
+        return True
+
+
 class IsAuthorized(BasePermission):
     def has_permission(self, request, view):
         if type(request.user) is not User:
