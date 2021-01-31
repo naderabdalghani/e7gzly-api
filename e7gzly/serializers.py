@@ -1,12 +1,10 @@
-import datetime
-
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, \
     SEAT_ID_MAX_LEN, ADDRESS_MAX_LEN, STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, \
-    VIP_SEATS_PER_ROW_MAX, VIP_ROWS_MAX, DATETIME_FORMAT, MAX_BIRTHDATE, MIN_AGE
+    VIP_SEATS_PER_ROW_MAX, VIP_ROWS_MAX, DATETIME_FORMAT, MIN_AGE
 
 
 class UserBaseSerializer(serializers.Serializer):
@@ -26,9 +24,9 @@ class UserBaseSerializer(serializers.Serializer):
     def validate(self, data):
         if data['role'] == 'admin':
             raise ValidationError({"role": "Cannot create a user with the given role"})
-        if data['birthdate'] > MAX_BIRTHDATE:
+        if data['birthdate'] > timezone.now().date() - timezone.timedelta(days=MIN_AGE * 365):
             raise ValidationError({"birthdate": "User must be at least {} years old to register an account"
-                                   .format(MIN_AGE)})
+                                  .format(MIN_AGE)})
         return data
 
 
@@ -42,8 +40,8 @@ class MatchBaseSerializer(serializers.Serializer):
                                                                                 max_length=NAME_MAX_LEN), min_length=2)
 
     def validate(self, data):
-        if not isinstance(data['date'], datetime.datetime):
-            data['date'] = datetime.datetime.strptime(data['date'], DATETIME_FORMAT)
+        if not isinstance(data['date'], timezone.datetime):
+            data['date'] = timezone.datetime.strptime(data['date'], DATETIME_FORMAT)
         if data['home_team'] == data['away_team']:
             raise ValidationError({"away_team": "Away team cannot be the same as the home team"})
         if data['date'] < timezone.now():
