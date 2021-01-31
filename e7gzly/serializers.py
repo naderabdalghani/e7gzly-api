@@ -54,7 +54,7 @@ class MatchBaseSerializer(serializers.Serializer):
 
 
 class StadiumBaseSerializer(serializers.Serializer):
-    _id = serializers.UUIDField(allow_null=False, required=True)
+    _id = serializers.UUIDField(allow_null=False, read_only=True)
     name = serializers.CharField(allow_null=False, allow_blank=False, max_length=STADIUM_NAME_MAX_LEN, required=True)
     capacity = serializers.IntegerField(allow_null=False, required=True)
     vip_seats_per_row = serializers.IntegerField(allow_null=False, required=True)
@@ -79,7 +79,7 @@ class StadiumBaseSerializer(serializers.Serializer):
 
 
 class SeatBaseSerializer(serializers.Serializer):
-    ticket_id = serializers.UUIDField(allow_null=False, required=True)
+    ticket_id = serializers.UUIDField(allow_null=False, read_only=True)
     seat_id = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=SEAT_ID_MAX_LEN)
 
 
