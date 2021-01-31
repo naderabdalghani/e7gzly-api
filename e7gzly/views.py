@@ -41,7 +41,7 @@ class AuthorizationView(APIView):
         Authorize a user
         """
         try:
-            user_id = request.data['user_id']
+            user_id = request.query_params['user_id']
         except KeyError:
             return Response(data={"user_id": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -112,8 +112,7 @@ class MatchView(APIView):
         try:
             match = Match.nodes.get(_id=match_id)
         except Match.DoesNotExist:
-            return Response(data={"_id": ["There is no match with the given id"]},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response(data={"_id": ["There is no match with the given id"]}, status=status.HTTP_404_NOT_FOUND)
         try:
             stadium = Stadium.nodes.get(_id=stadium_id)
         except Stadium.DoesNotExist:
