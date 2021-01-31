@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
+from django.utils import timezone
 from neomodel import UniqueProperty
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
@@ -6,9 +7,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_condition import And, Or
 from .models import Match, Stadium, User, Token, Seat
-from .constants import MATCHES_PER_PAGE
+from .constants import MATCHES_PER_PAGE, TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
-    LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer
+    LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
+    ReservationCancellationSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, IsUser
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -179,9 +181,26 @@ class ReservationView(APIView):
 
     def delete(self, request):
         """
-        Cancel a seat reservation
+        Cancel a reservation
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = ReservationCancellationSerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        try:
+            reservation = user.reservations.get(ticket_id=serializer.validated_data['ticket_id'].hex)
+        except Seat.DoesNotExist:
+            return Response(data={"ticket_id": ["There is no reservation with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        if timezone.now() > reservation.match.single().date - timezone.timedelta(days=TICKET_CANCELLATION_WINDOW):
+            return Response(data={
+                "ticket_id": [
+                    "Reservations can be cancelled in at least {} days before the corresponding event"
+                    .format(TICKET_CANCELLATION_WINDOW)
+                ]
+            }, status=status.HTTP_403_FORBIDDEN)
+        reservation.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LoggingInView(ObtainAuthToken):
