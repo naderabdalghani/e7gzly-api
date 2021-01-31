@@ -13,7 +13,7 @@ from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerialize
     ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
     UserEditingSerializer, ChangePasswordSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
-    IsUser, IsDeleteRequest
+    IsUser, IsDeleteRequest, IsPatchRequest
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -223,6 +223,10 @@ class LoggingInView(ObtainAuthToken):
 
 
 class UserView(APIView):
+    permission_classes = [Or(And(IsReadOnlyRequest, IsAdmin),
+                             And(Or(IsPutRequest, IsPatchRequest), IsUser),
+                             And(IsDeleteRequest, IsAdmin))]
+
     def get(self, request):
         """
         Retrieve a list of users
