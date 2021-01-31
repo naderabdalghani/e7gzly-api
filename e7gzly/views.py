@@ -7,7 +7,8 @@ from rest_framework import status
 from rest_condition import And, Or
 from .models import Match, Stadium, User, Token
 from .constants import MATCHES_PER_PAGE
-from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, LoginDataSerializer
+from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
+    LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -124,17 +125,24 @@ class MatchView(APIView):
 
 
 class StadiumView(APIView):
+    permission_classes = [Or(And(IsReadOnlyRequest),
+                             And(IsPostRequest, And(IsManager, IsAuthorized)))]
+
     def get(self, request):
         """
-        Retrieve a list of stadiums
+        Retrieve a list of all stadiums
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        return Response(data=StadiumBaseSerializer(Stadium.nodes, many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """
         Create a new stadium
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = StadiumBaseSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        stadium = Stadium.create(serializer.validated_data)[0]
+        return Response(data=StadiumSerializer(stadium).data, status=status.HTTP_201_CREATED)
 
 
 class ReservationView(APIView):
