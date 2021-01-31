@@ -10,7 +10,7 @@ from .models import Match, Stadium, User, Token, Seat
 from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
-    ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer
+    ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, \
     IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -254,4 +254,13 @@ class UserView(APIView):
         """
         Delete an existing user
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = UserDeletionSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        user_id = serializer.validated_data['user_id']
+        try:
+            user = User.nodes.get(_id=user_id.hex)
+        except User.DoesNotExist:
+            return Response(data={"user_id": ["There is no user with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

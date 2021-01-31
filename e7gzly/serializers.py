@@ -144,3 +144,7 @@ class UsersRetrievalSerializer(serializers.Serializer):
 class MatchesRetrievalSerializer(serializers.Serializer):
     matches_per_page = serializers.IntegerField(default=MATCHES_PER_PAGE, allow_null=False)
     page_number = serializers.IntegerField(default=1, allow_null=False)
+
+
+class UserDeletionSerializer(serializers.Serializer):
+    user_id = serializers.UUIDField(required=True, allow_null=False)
