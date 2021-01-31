@@ -5,11 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_condition import And, Or
-from .models import Match, Stadium, User, Token
+from .models import Match, Stadium, User, Token, Seat
 from .constants import MATCHES_PER_PAGE
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
-    LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer
-from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin
+    LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer
+from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, IsUser
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -145,11 +145,13 @@ class StadiumView(APIView):
 
 
 class ReservationView(APIView):
+    permission_classes = [IsUser]
+
     def get(self, request):
         """
-        Retrieve vacant/reserved seats for a match
+        Retrieve reserved seats for a user
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        return Response(data=SeatSerializer(request.user.reservations.all(), many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """
