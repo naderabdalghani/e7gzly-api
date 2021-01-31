@@ -38,6 +38,9 @@ class Stadium(StructuredNode):
     vip_rows = IntegerProperty(required=True)
     matches = RelationshipFrom("Match", "HOSTED_IN")
 
+    def is_valid_seat(self, seat_id):
+        return True
+
 
 class Match(StructuredNode):
     _id = UniqueIdProperty()
@@ -66,6 +69,13 @@ class Match(StructuredNode):
                 query += "SET n:`{0}`\n".format(label)
             self.cypher(query, params)
         return self
+
+    def is_available_seat(self, seat_id):
+        reserved_seats = self.seats.all()
+        for seat in reserved_seats:
+            if seat_id == seat.seat_id:
+                return False
+        return True
 
 
 class Token(StructuredNode):
