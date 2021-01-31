@@ -119,7 +119,7 @@ class MatchView(APIView):
                             status=status.HTTP_404_NOT_FOUND)
         match = match.update(serializer.validated_data)
         match.match_venue.reconnect(match.match_venue.single(), stadium)
-        return Response(status=status.HTTP_200_OK)
+        return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
 
 
 class StadiumView(APIView):
