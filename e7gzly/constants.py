@@ -1,3 +1,5 @@
+import datetime
+
 NAME_MAX_LEN = 50
 STADIUM_NAME_MAX_LEN = 100
 SEAT_ID_MAX_LEN = 20
@@ -10,6 +12,8 @@ VIP_ROWS_MAX = 20
 ADDRESS_MAX_LEN = 200
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 TOKEN_MAX_LEN = 40
+MIN_AGE = 16
+MAX_BIRTHDATE = datetime.datetime.now() - datetime.timedelta(days=MIN_AGE * 365)
 
 GENDERS = (
     ('male', 'Male'),

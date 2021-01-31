@@ -5,8 +5,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, \
-    SEAT_ID_MAX_LEN, ADDRESS_MAX_LEN, STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, VIP_SEATS_PER_ROW_MAX, \
-    VIP_ROWS_MAX, DATETIME_FORMAT
+    SEAT_ID_MAX_LEN, ADDRESS_MAX_LEN, STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, \
+    VIP_SEATS_PER_ROW_MAX, VIP_ROWS_MAX, DATETIME_FORMAT, MAX_BIRTHDATE, MIN_AGE
 
 
 class UserBaseSerializer(serializers.Serializer):
@@ -26,6 +26,9 @@ class UserBaseSerializer(serializers.Serializer):
     def validate(self, data):
         if data['role'] == 'admin':
             raise ValidationError({"role": "Cannot create a user with the given role"})
+        if data['birthdate'] > MAX_BIRTHDATE:
+            raise ValidationError({"birthdate": "User must be at least {} years old to register an account"
+                                   .format(MIN_AGE)})
         return data
 
 
