@@ -10,8 +10,9 @@ from .models import Match, Stadium, User, Token, Seat
 from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
-    ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer
-from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, \
+    ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
+    UserEditingSerializer
+from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -249,6 +250,15 @@ class UserView(APIView):
         Update an existing user
         """
         return Response('Temporary Data', status=status.HTTP_200_OK)
+
+    def put(self, request):
+        """
+        Update user personal info
+        """
+        serializer = UserEditingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user.update(serializer.validated_data)
+        return Response(data=UserBaseSerializer(user).data, status=status.HTTP_200_OK)
 
     def delete(self, request):
         """

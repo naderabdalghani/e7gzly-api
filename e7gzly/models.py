@@ -29,6 +29,25 @@ class User(StructuredNode):
     reservations = RelationshipTo('Seat', 'RESERVED_A')
     token = RelationshipTo('Token', 'BEARS_A', cardinality=ZeroOrOne)
 
+    def update(self, data):
+        self.first_name = data['first_name']
+        self.last_name = data['last_name']
+        self.birthdate = data['birthdate']
+        self.gender = data['gender']
+        self.city = data['city']
+        self.address = data.get('address', None)
+        if hasattr(self, 'deleted') and self.deleted:
+            raise ValueError("{0}.save() attempted on deleted node".format(self.__class__.__name__))
+        if hasattr(self, 'id'):
+            params = self.deflate(self.__properties__, self)
+            params.pop('_id')
+            query = "MATCH (n) WHERE id(n)=$self \n"
+            query += "\n".join(["SET n.{0} = ${1}".format(key, key) + "\n" for key in params.keys()])
+            for label in self.inherited_labels():
+                query += "SET n:`{0}`\n".format(label)
+            self.cypher(query, params)
+        return self
+
 
 class Stadium(StructuredNode):
     _id = UniqueIdProperty()

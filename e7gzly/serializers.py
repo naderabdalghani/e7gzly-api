@@ -148,3 +148,18 @@ class MatchesRetrievalSerializer(serializers.Serializer):
 
 class UserDeletionSerializer(serializers.Serializer):
     user_id = serializers.UUIDField(required=True, allow_null=False)
+
+
+class UserEditingSerializer(serializers.Serializer):
+    first_name = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
+    last_name = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
+    birthdate = serializers.DateField(required=True, allow_null=False)
+    gender = serializers.ChoiceField(required=True, choices=GENDERS, allow_null=False, allow_blank=False)
+    city = serializers.ChoiceField(required=True, choices=CITIES, allow_null=False, allow_blank=False)
+    address = serializers.CharField(required=False, allow_null=True, allow_blank=False, max_length=ADDRESS_MAX_LEN)
+
+    def validate(self, data):
+        if data['birthdate'] > timezone.now().date() - timezone.timedelta(days=MIN_AGE * 365):
+            raise ValidationError({"birthdate": "User must be at least {} years old to register an account"
+                                  .format(MIN_AGE)})
+        return data
