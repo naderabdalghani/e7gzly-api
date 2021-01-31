@@ -7,10 +7,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_condition import And, Or
 from .models import Match, Stadium, User, Token, Seat
-from .constants import MATCHES_PER_PAGE, TICKET_CANCELLATION_WINDOW
+from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
-    ReservationCancellationSerializer, UsersRetrievalSerializer
+    ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, \
     IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -64,11 +64,11 @@ class MatchView(APIView):
         """
         Retrieve a list of matches
         """
-        try:
-            matches_per_page = int(request.query_params.get('matches_per_page', MATCHES_PER_PAGE))
-        except ValueError:
-            matches_per_page = MATCHES_PER_PAGE
-        page_number = request.query_params.get('page_number', 1)
+        serializer = MatchesRetrievalSerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        matches_per_page = serializer.validated_data['matches_per_page']
+        page_number = serializer.validated_data['page_number']
         matches = Match.nodes
         paginator = Paginator(matches, matches_per_page)
         try:
