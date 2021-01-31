@@ -183,7 +183,7 @@ class LoggingInView(ObtainAuthToken):
         token = user.token.single()
         if token is not None:
             token.delete()
-        token = Token().create({})[0].save()
+        token = Token().save()
         user.token.connect(token)
         return Response(data={'token': token.key}, status=status.HTTP_200_OK)
 
