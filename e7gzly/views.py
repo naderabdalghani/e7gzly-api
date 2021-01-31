@@ -11,7 +11,8 @@ from .constants import MATCHES_PER_PAGE, TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
     ReservationCancellationSerializer
-from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, IsUser
+from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, \
+    IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -147,7 +148,8 @@ class StadiumView(APIView):
 
 
 class ReservationView(APIView):
-    permission_classes = [IsUser]
+    permission_classes = [Or(And(IsReadOnlyRequest, IsUser),
+                             And(Or(IsPostRequest, IsDeleteRequest), IsAuthorized))]
 
     def get(self, request):
         """
