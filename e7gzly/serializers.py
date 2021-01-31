@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, \
     SEAT_ID_MAX_LEN, ADDRESS_MAX_LEN, STADIUM_MIN_CAPACITY, VIP_SEATS_PER_ROW_MIN, VIP_ROWS_MIN, \
-    VIP_SEATS_PER_ROW_MAX, VIP_ROWS_MAX, DATETIME_FORMAT, MIN_AGE
+    VIP_SEATS_PER_ROW_MAX, VIP_ROWS_MAX, DATETIME_FORMAT, MIN_AGE, USERS_PER_PAGE
 
 
 class UserBaseSerializer(serializers.Serializer):
@@ -133,3 +133,9 @@ class SeatReservationSerializer(serializers.Serializer):
 
 class ReservationCancellationSerializer(serializers.Serializer):
     ticket_id = serializers.UUIDField(required=True, allow_null=False)
+
+
+class UsersRetrievalSerializer(serializers.Serializer):
+    unauthorized = serializers.BooleanField(default=False, allow_null=False)
+    users_per_page = serializers.IntegerField(default=USERS_PER_PAGE, allow_null=False)
+    page_number = serializers.IntegerField(default=1, allow_null=False)

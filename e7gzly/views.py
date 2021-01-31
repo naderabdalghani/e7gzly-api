@@ -10,7 +10,7 @@ from .models import Match, Stadium, User, Token, Seat
 from .constants import MATCHES_PER_PAGE, TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
-    ReservationCancellationSerializer
+    ReservationCancellationSerializer, UsersRetrievalSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, IsFan, \
     IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -234,7 +234,24 @@ class UserView(APIView):
         """
         Retrieve a list of users
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = UsersRetrievalSerializer(data=request.query_params)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        unauthorized = serializer.validated_data['unauthorized']
+        users_per_page = serializer.validated_data['users_per_page']
+        page_number = serializer.validated_data['page_number']
+        users = User.nodes
+        if unauthorized:
+            users = users.filter(authorized=False)
+        paginator = Paginator(users, users_per_page)
+        try:
+            users = paginator.page(page_number)
+        except (PageNotAnInteger, InvalidPage):
+            users = paginator.page(1)
+        except EmptyPage:
+            users = paginator.page(paginator.num_pages)
+        users = UserBaseSerializer(users, many=True).data
+        return Response(data=users, status=status.HTTP_200_OK)
 
     def patch(self, request):
         """
