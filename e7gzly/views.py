@@ -8,7 +8,7 @@ from rest_condition import And, Or
 from .models import Match, Stadium, User, Token
 from .constants import MATCHES_PER_PAGE
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, LoginDataSerializer
-from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized
+from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -33,11 +33,23 @@ class RegistrationView(APIView):
 
 
 class AuthorizationView(APIView):
+    permission_classes = [IsAdmin]
+
     def patch(self, request):
         """
         Authorize a user
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        try:
+            user_id = request.data['user_id']
+        except KeyError:
+            return Response(data={"user_id": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.nodes.get(_id=user_id)
+        except User.DoesNotExist:
+            return Response(data={"user_id": ["There is no user with the given id"]}, status=status.HTTP_404_NOT_FOUND)
+        user.authorized = True
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MatchView(APIView):
