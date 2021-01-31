@@ -126,3 +126,8 @@ class SeatSerializer(SeatBaseSerializer):
 class LoginDataSerializer(serializers.Serializer):
     username = serializers.CharField(required=True, allow_null=False, allow_blank=False)
     password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
+
+
+class SeatReservationSerializer(serializers.Serializer):
+    match_id = serializers.UUIDField(required=True, allow_null=False)
+    seat_id = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=SEAT_ID_MAX_LEN)
