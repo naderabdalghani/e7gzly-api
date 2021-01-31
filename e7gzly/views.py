@@ -11,7 +11,7 @@ from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
     ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
-    UserEditingSerializer
+    UserEditingSerializer, ChangePasswordSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -247,9 +247,16 @@ class UserView(APIView):
 
     def patch(self, request):
         """
-        Update an existing user
+        Update user password
         """
-        return Response('Temporary Data', status=status.HTTP_200_OK)
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not check_password(serializer.validated_data['old_password'], request.user.password):
+            return Response(data={"old_password": ["Incorrect old password"]}, status=status.HTTP_403_FORBIDDEN)
+        user = request.user
+        user.password = make_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def put(self, request):
         """

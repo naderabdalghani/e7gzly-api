@@ -163,3 +163,9 @@ class UserEditingSerializer(serializers.Serializer):
             raise ValidationError({"birthdate": "User must be at least {} years old to register an account"
                                   .format(MIN_AGE)})
         return data
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
+    new_password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
+
