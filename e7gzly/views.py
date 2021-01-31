@@ -22,8 +22,7 @@ class RegistrationView(APIView):
         Register a new unauthorized user
         """
         serializer = UserBaseSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         user_data = serializer.validated_data
         user_data['password'] = make_password(user_data['password'])
         try:
@@ -65,8 +64,7 @@ class MatchView(APIView):
         Retrieve a list of matches
         """
         serializer = MatchesRetrievalSerializer(data=request.query_params)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         matches_per_page = serializer.validated_data['matches_per_page']
         page_number = serializer.validated_data['page_number']
         matches = Match.nodes
@@ -88,8 +86,7 @@ class MatchView(APIView):
         if stadium_id is None:
             return Response(data={"match_venue": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
         serializer = MatchBaseSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         try:
             stadium = Stadium.nodes.get(_id=stadium_id)
         except Stadium.DoesNotExist:
@@ -110,8 +107,7 @@ class MatchView(APIView):
         if stadium_id is None:
             return Response(data={"match_venue": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
         serializer = MatchBaseSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         try:
             match = Match.nodes.get(_id=match_id)
         except Match.DoesNotExist:
@@ -141,8 +137,7 @@ class StadiumView(APIView):
         Create a new stadium
         """
         serializer = StadiumBaseSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         stadium = Stadium.create(serializer.validated_data)[0]
         return Response(data=StadiumSerializer(stadium).data, status=status.HTTP_201_CREATED)
 
@@ -162,8 +157,7 @@ class ReservationView(APIView):
         Reserve a vacant seat for a match
         """
         serializer = SeatReservationSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         match_id = serializer.validated_data['match_id']
         seat_id = serializer.validated_data['seat_id']
         try:
@@ -186,8 +180,7 @@ class ReservationView(APIView):
         Cancel a reservation
         """
         serializer = ReservationCancellationSerializer(data=request.query_params)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         user = request.user
         try:
             reservation = user.reservations.get(ticket_id=serializer.validated_data['ticket_id'].hex)
@@ -211,8 +204,7 @@ class LoggingInView(ObtainAuthToken):
         Authenticate a user and provide an access token
         """
         serializer = LoginDataSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
         try:
@@ -235,8 +227,7 @@ class UserView(APIView):
         Retrieve a list of users
         """
         serializer = UsersRetrievalSerializer(data=request.query_params)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         unauthorized = serializer.validated_data['unauthorized']
         users_per_page = serializer.validated_data['users_per_page']
         page_number = serializer.validated_data['page_number']
