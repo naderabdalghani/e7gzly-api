@@ -9,7 +9,7 @@ paths:
   /account/login/:
     post:
       operationId: account_login
-      description: Authenticate a user and provide an access token
+      description: Authenticate a *user* and provide an access token.
       tags:
       - Account
       requestBody:
@@ -38,18 +38,18 @@ paths:
                   token:
                     type: string
                     example: 22640f11bb3c01604681120afdec28295d6b5280
-          description: Created token key
+          description: Created token key.
         401:
           content:
             text/plain:
               schema:
                 type: string
                 example: Incorrect credentials
-          description: Unauthorized. Incorrect credentials
+          description: Unauthorized. Incorrect credentials.
   /account/registration/:
     post:
       operationId: account_registration
-      description: Register a new unauthorized user
+      description: Register a new unauthorized *user*.
       tags:
       - Account
       requestBody:
@@ -83,30 +83,23 @@ paths:
                       type: string
                 example:
                   role: [Cannot create a user with the given role]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         409:
           content:
             text/plain:
               schema:
                 type: string
                 example: A user with the given username already exists
-          description: 'A user with the given username/email already exists'
+          description: A user with the given username/email already exists.
   /users/authorize/:
     patch:
       operationId: authorize_account
-      description: Authorize a user account
+      description: Authorize a user account.<br><br> Supplied token **must** be of an *Admin* account.
       tags:
       - Account
       security:
       - TokenAuthentication: []
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
-        description: Supplied token must be of an Admin account
       - in: query
         name: user_id
         schema:
@@ -115,7 +108,7 @@ paths:
         required: true
       responses:
         204:
-          description: No response body
+          description: No response body.
         401:
           content:
             application/json:
@@ -125,7 +118,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -135,7 +128,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to a non-admin user account
+          description: Permission denied. The supplied token belongs to a non-admin user account.
         404:
           content:
             application/json:
@@ -148,11 +141,11 @@ paths:
                       type: string
                 example:
                   user_id: [There is no user with the given id]
-          description: There is no user with the given id
+          description: There is no user with the given id.
   /matches/:
     get:
       operationId: get_matches
-      description: Retrieve a list of matches
+      description: Retrieve a list of matches.
       parameters:
       - in: query
         name: matches_per_page
@@ -174,7 +167,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
-          description: Array of retrieved matches
+          description: Array of retrieved matches.
         400:
           content:
             application/json:
@@ -187,22 +180,14 @@ paths:
                       type: string
                 example:
                   page_number: [A valid integer is required.]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
     post:
       operationId: create_match
-      description: Create a new match event
+      description: Create a new match event.<br><br> Supplied token **must** be of an *authorized Manager* account.
       tags:
       - Matches
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        description: Supplied token must be of an authorized Manager account
-        required: true
       requestBody:
         content:
           application/json:
@@ -227,7 +212,7 @@ paths:
                     properties:
                       seats:
                         example: []
-          description: Match added
+          description: Match added.
         400:
           content:
             application/json:
@@ -240,7 +225,7 @@ paths:
                       type: string
                 example:
                   away_team: [This field is required]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -250,7 +235,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -260,7 +245,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account
+          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account.
         404:
           content:
             application/json:
@@ -273,22 +258,14 @@ paths:
                       type: string
                 example:
                   match_venue: [There is no stadium with the given id]
-          description: Given stadium id doesn't exist
+          description: Given stadium id doesn't exist.
     put:
       operationId: update_match
-      description: Update the details of an existing match
+      description: Update the details of an existing match.<br><br> Supplied token **must** be of an *authorized Manager* account.
       tags:
       - Matches
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        description: Supplied token must be of an authorized Manager account
-        required: true
       requestBody:
         content:
           application/json:
@@ -310,7 +287,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
-          description: Edited match
+          description: Edited match.
         400:
           content:
             application/json:
@@ -323,7 +300,7 @@ paths:
                       type: string
                 example:
                   away_team: [This field is required]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -333,7 +310,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -343,7 +320,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account
+          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account.
         404:
           content:
             application/json:
@@ -356,22 +333,15 @@ paths:
                       type: string
                 example:
                   _id: [There is no match with the given id]
-          description: Given match/stadium id doesn't exist
+          description: Given match/stadium id doesn't exist.
   /seats/:
     get:
       operationId: get_user_reservations
-      description: Retrieve reserved seats for a user
+      description: Retrieve reserved seats for a user.
       tags:
       - Reservations
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
       responses:
         200:
           content:
@@ -380,7 +350,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Seat'
-          description: Array of reserved seats
+          description: Array of reserved seats.
         401:
           content:
             application/json:
@@ -390,22 +360,14 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
     post:
       operationId: reserve_seat
-      description: Reserve a vacant seat for a match
+      description: Reserve a vacant seat for a match.<br><br> Provided token key **must** belong to an *authorized User* i.e `User.authorized = true`.
       tags:
       - Reservations
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
-        description: Token key must belong to an authorized User i.e User.authorized = true
       requestBody:
         content:
           application/json:
@@ -436,7 +398,7 @@ paths:
                         properties:
                           authorized:
                             example: true
-          description: Seat reserved
+          description: Seat reserved.
         400:
           content:
             application/json:
@@ -449,7 +411,7 @@ paths:
                       type: string
                 example:
                   seat_id: [Invalid seat_id]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -459,7 +421,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -469,7 +431,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to an unauthorized user account
+          description: Permission denied. The supplied token belongs to an unauthorized user account.
         404:
           content:
             application/json:
@@ -482,7 +444,7 @@ paths:
                       type: string
                 example:
                   match_id: [There is no match with the given id]
-          description: Given match_id doesn't exist
+          description: Given match_id doesn't exist.
         409:
           content:
             application/json:
@@ -495,22 +457,15 @@ paths:
                       type: string
                 example:
                   seat_id: [Seat is already reserved]
-          description: Seat is already reserved
+          description: Seat is already reserved.
     delete:
       operationId: cancel_reservation
-      description: Cancel a ticket reservation
+      description: Cancel a ticket reservation.<br><br> Token key **must** belong to an *authorized User* i.e `User.authorized = true`.
       tags:
       - Reservations
       security:
       - TokenAuthentication: []
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
-        description: Token key must belong to an authorized User i.e User.authorized = true
       - in: query
         name: ticket_id
         schema:
@@ -520,7 +475,7 @@ paths:
         required: true
       responses:
         204:
-          description: No response body
+          description: No response body.
         401:
           content:
             application/json:
@@ -530,7 +485,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -543,7 +498,7 @@ paths:
                       type: string
                 example:
                   ticket_id: [Reservations can be cancelled in at least 3 days before the corresponding event]
-          description: Permission denied because either the match event for which the ticket is reserved is about to start in less than 3 days or the supplied token belongs to an unauthorized user account
+          description: Permission denied because either the match event for which the ticket is reserved is about to start in less than 3 days or the supplied token belongs to an unauthorized user account.
         404:
           content:
             application/json:
@@ -556,11 +511,11 @@ paths:
                       type: string
                 example:
                   ticket_id: [There is no reservation with the given id]
-          description: Given ticket_id doesn't exist for the user who submitted the request
+          description: Given ticket_id doesn't exist for the user who submitted the request.
   /stadiums/:
     get:
       operationId: get_stadiums
-      description: Retrieve a list of all stadiums
+      description: Retrieve a list of all stadiums.
       tags:
       - Stadiums
       responses:
@@ -574,19 +529,11 @@ paths:
           description: Array of retrieved stadiums
     post:
       operationId: add_stadium
-      description: Add a new stadium
+      description: Add a new stadium.<br><br> Supplied token **must** be of an authorized *Manager* account.
       tags:
       - Stadiums
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        description: Supplied token must be of an authorized Manager account
-        required: true
       requestBody:
         content:
           application/json:
@@ -604,7 +551,7 @@ paths:
                     properties:
                       matches:
                         example: []
-          description: Stadium added
+          description: Stadium added.
         400:
           content:
             application/json:
@@ -617,7 +564,7 @@ paths:
                       type: string
                 example:
                   vip_rows: [This field is required]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -627,7 +574,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -637,27 +584,20 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account
+          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account.
   /users/:
     get:
       operationId: get_users
-      description: Retrieve a list of users
+      description: Retrieve a list of users. Supplied token **must** be of an *Admin* account.
       security:
       - TokenAuthentication: []
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        description: Supplied token must be of an Admin account
-        required: true
       - in: query
         name: unauthorized
         schema:
           type: boolean
           default: false
-        description: Retrieve only unauthorized users if set to true
+        description: Retrieve only unauthorized users if `true`.
       - in: query
         name: users_per_page
         schema:
@@ -678,7 +618,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserBase'
-          description: Array of retrieved users
+          description: Array of retrieved users.
         400:
           content:
             application/json:
@@ -691,7 +631,7 @@ paths:
                       type: string
                 example:
                   page_number: [A valid integer is required.]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -701,7 +641,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -711,21 +651,14 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to a non-admin user account
+          description: Permission denied. The supplied token belongs to a non-admin user account.
     put:
       operationId: edit_user_profile
-      description: Update user personal info
+      description: Update user personal info.
       tags:
       - Users
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
       requestBody:
         content:
           application/json:
@@ -749,7 +682,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserBase'
-          description: Edited user
+          description: Edited user.
         400:
           content:
             application/json:
@@ -762,7 +695,7 @@ paths:
                       type: string
                 example:
                   last_name: [This field is required]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -772,7 +705,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
     patch:
       operationId: change_user_password
       description: Update user password
@@ -780,13 +713,6 @@ paths:
       - Users
       security:
       - TokenAuthentication: []
-      parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
       requestBody:
         content:
           application/json:
@@ -803,7 +729,7 @@ paths:
         required: true
       responses:
         204:
-          description: No response body
+          description: No response body.
         400:
           content:
             application/json:
@@ -816,7 +742,7 @@ paths:
                       type: string
                 example:
                   new_password: [This field is required]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         401:
           content:
             application/json:
@@ -826,7 +752,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -842,19 +768,12 @@ paths:
           description: Incorrect credentials
     delete:
       operationId: users_destroy
-      description: Delete an existing user
+      description: Delete an existing user.<br><br> Supplied token **must** be of an *Admin* account.
       tags:
       - Users
       security:
       - TokenAuthentication: []
       parameters:
-      - in: header
-        name: Authorization
-        schema:
-          type: string
-          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
-        required: true
-        description: Supplied token must be of an Admin account
       - in: query
         name: user_id
         schema:
@@ -863,7 +782,7 @@ paths:
         required: true
       responses:
         204:
-          description: No response body
+          description: No response body.
         401:
           content:
             application/json:
@@ -873,7 +792,7 @@ paths:
                   detail:
                     type: string
                     example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token
+          description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
             application/json:
@@ -883,7 +802,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to a non-admin user account
+          description: Permission denied. The supplied token belongs to a non-admin user account.
         404:
           content:
             application/json:
@@ -896,7 +815,7 @@ paths:
                       type: string
                 example:
                   user_id: [There is no user with the given id]
-          description: There is no user with the given id
+          description: There is no user with the given id.
 components:
   securitySchemes:
     TokenAuthentication:
