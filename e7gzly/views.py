@@ -57,7 +57,7 @@ class AuthorizationView(APIView):
 
 
 class MatchView(APIView):
-    permission_classes = [Or(And(IsReadOnlyRequest),
+    permission_classes = [Or(IsReadOnlyRequest,
                              And(Or(IsPostRequest, IsPutRequest), And(IsManager, IsAuthorized)))]
 
     def get(self, request):
@@ -124,8 +124,8 @@ class MatchView(APIView):
 
 
 class StadiumView(APIView):
-    permission_classes = [Or(And(IsReadOnlyRequest),
-                             And(IsPostRequest, And(IsManager, IsAuthorized)))]
+    permission_classes = [Or(IsReadOnlyRequest,
+                             And(IsPostRequest, IsManager, IsAuthorized))]
 
     def get(self, request):
         """
