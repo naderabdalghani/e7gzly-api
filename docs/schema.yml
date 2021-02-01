@@ -5,30 +5,127 @@ info:
 paths:
   /account/login/:
     post:
-      operationId: account_login_create
+      operationId: account_login
       description: Authenticate a user and provide an access token
       tags:
-      - account
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  maxLength: 50
+                password:
+                  type: string
+                  format: password
+              example:
+                username: muhanadAtef23
+                password: m827hf#$
+        required: true
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 22640f11bb3c01604681120afdec28295d6b5280
+          description: 'Created token key'
+        '401':
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Incorrect credentials
+          description: 'Incorrect credentials'
   /account/registration/:
     post:
-      operationId: account_registration_create
+      operationId: account_registration
       description: Register a new unauthorized user
       tags:
-      - account
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBase'
+        required: true
       responses:
-        '200':
+        '201':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      reservations:
+                        example: []
+
+          description: Created user
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  role: [Cannot create a user with the given role]
+          description: Bad request
+        '409':
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: A user with the given username already exists
+          description: 'A user with the given username/email already exists'
+  /users/authorize/:
+    patch:
+      operationId: authorize_account
+      description: Authorize a user account
+      tags:
+      - Account
+      security:
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
+        description: Supplied token must be of an Admin account
+      - in: query
+        name: user_id
+        schema:
+          type: string
+          example: 3fa85f6457174562b3fc2c963f66afa6
+        required: true
+      responses:
+        '204':
           description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  user_id: [There is no user with the given id]
+          description: There is no user with the given id
   /matches/:
     get:
       operationId: get_matches
@@ -54,24 +151,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
-              example:
-              - _id: f23da8a82a4e4baf938e6f03445e7f51
-                home_team: pyramids fc
-                away_team: smouha sc
-                date: '2020-10-13T03:10:11Z'
-                referee: Damian Aiken
-                linesmen:
-                - Tyler Rowberry
-                - Hogan Slayton
-                match_venue:
-                  _id: 7b4d0bb5ceb649f087f7a90a497b34f9
-                  name: Sohag Stadium
-                  capacity: 16000
-                  vip_seats_per_row: 28
-                  vip_rows: 17
-                seats:
-                - ticket_id: 01a467324e60460089e38da2e4aaf9fe
-                  seat_id: A4
           description: Array of retrieved matches
     post:
       operationId: create_match
@@ -80,43 +159,38 @@ paths:
       - Matches
       security:
       - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        description: Supplied token must be of an authorized Manager account
+        required: true
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Match'
-            example:
-              home_team: pyramids fc
-              away_team: al ahly sc
-              date: '2021-03-19T07:00:00Z'
-              referee: Mohammad Abdo
-              linesmen:
-              - Tyler Charlie
-              - Hogan McDonald
-              match_venue: 4e6cc1704b38499eb36ec29086d46c48
+               allOf:
+                - $ref: '#/components/schemas/MatchBase'
+                - type: object
+                  properties:
+                    match_venue:
+                      type: string
+                      format: uuid
+                      example: 66fdd7c816294870af211aa00a23fe0b
         required: true
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Match'
-              example:
-                _id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-                home_team: pyramids fc
-                away_team: al ahly sc
-                date: '2021-03-19T07:00:00Z'
-                referee: Mohammad Abdo
-                linesmen:
-                - Tyler Charlie
-                - Hogan McDonald
-                match_venue:
-                  _id: 4e6cc1704b38499eb36ec29086d46c48
-                  name: Borg El Arab Stadium
-                  vip_rows: 20
-                  vip_seats_per_row: 10
-                  capacity: 86000
-                seats: []
+                allOf:
+                  - $ref: '#/components/schemas/Match'
+                  - type: object
+                    properties:
+                      seats:
+                        example: []
           description: 'Added match'
         '400':
           content:
@@ -125,10 +199,12 @@ paths:
                 type: object
                 properties:
                   bad_field:
-                    type: string
+                    type: array
+                    items:
+                      type: string
                 example:
-                  away_team: This field is required
-          description: 'Bad request'
+                  away_team: [This field is required]
+          description: Bad request
         '404':
           content:
             application/json:
@@ -136,8 +212,11 @@ paths:
                 type: object
                 properties:
                   match_venue:
-                    type: string
-                    example: There is no stadium with the given id
+                    type: array
+                    items:
+                      type: string
+                example:
+                  match_venue: [There is no stadium with the given id]
           description: "Given stadium id doesn't exist"
     put:
       operationId: update_match
@@ -146,25 +225,36 @@ paths:
       - Matches
       security:
       - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        description: Supplied token must be of an authorized Manager account
+        required: true
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Match'
-            example:
-              _id: d6752d6d819a41cd8055cadee4d969b4
-              home_team: pyramids fc
-              away_team: zamalek sc
-              date: '2021-03-19T07:00:00Z'
-              referee: Mohammad Abdo
-              linesmen:
-              - Tyler Charlie
-              - Hogan McDonald
-              match_venue: ef61a925c45342b99a683eab31d26602
+               allOf:
+                - $ref: '#/components/schemas/MatchBase'
+                - type: object
+                  properties:
+                    _id:
+                      readOnly: false
+                    match_venue:
+                      type: string
+                      format: uuid
+                      example: 66fdd7c816294870af211aa00a23fe0b
         required: true
       responses:
-        '200':
-          description: Match updated successfully
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+          description: 'Edited match'
         '400':
           content:
             application/json:
@@ -172,10 +262,12 @@ paths:
                 type: object
                 properties:
                   bad_field:
-                    type: string
+                    type: array
+                    items:
+                      type: string
                 example:
-                  away_team: This field is required
-          description: 'Bad request'
+                  away_team: [This field is required]
+          description: Bad request
         '404':
           content:
             application/json:
@@ -183,127 +275,425 @@ paths:
                 type: object
                 properties:
                   _id:
-                    type: string
-                    example: There is no match with the given id
+                    type: array
+                    items:
+                      type: string
+                example:
+                  _id: [There is no match with the given id]
           description: "Given match/stadium id doesn't exist"
   /seats/:
     get:
-      operationId: seats_retrieve
-      description: Retrieve vacant/reserved seats for a match
+      operationId: get_user_reservations
+      description: Retrieve reserved seats for a user
       tags:
-      - seats
+      - Reservations
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Seat'
+          description: Array of reserved seats
     post:
-      operationId: seats_create
+      operationId: reserve_seat
       description: Reserve a vacant seat for a match
       tags:
-      - seats
+      - Reservations
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
+        description: Token key must belong to an authorized User i.e User.authorized = true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                match_id:
+                  type: string
+                  format: uuid
+                  example: 211d75a398e3473ea2bd063b680066dc
+                seat_id:
+                  type: string
+                  example: A6
+        required: true
       responses:
-        '200':
-          description: No response body
+        '201':
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Seat'
+                - type: object
+                  properties:
+                    user:
+                      allOf:
+                      - $ref: '#/components/schemas/UserBase'
+                      - type: object
+                        properties:
+                          authorized:
+                            example: true
+          description: 'Reserved seat'
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  seat_id: [Invalid seat_id]
+          description: Bad request
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match_id:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  match_id: [There is no match with the given id]
+          description: Given match_id doesn't exist
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match_id:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  seat_id: [Seat already reserved]
+          description: "Given match_id doesn't exist"
     delete:
-      operationId: seats_destroy
+      operationId: cancel_reservation
       description: Cancel a seat reservation
       tags:
-      - seats
+      - Reservations
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
+        description: Token key must belong to an authorized User i.e User.authorized = true
+      - in: query
+        name: ticket_id
+        schema:
+          type: string
+          format: uuid
+          example: e415e8a1b8c34482b498f1948b4f936a
+        required: true
       responses:
         '204':
           description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticket_id:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  ticket_id: [There is no reservation with the given id]
+          description: Given ticket_id doesn't exist for the user who submitted the request
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticket_id:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  ticket_id: [Reservations can be cancelled in at least 3 days before the corresponding event]
+          description: Reservations can be cancelled in at least 3 days before the corresponding event
   /stadiums/:
     get:
-      operationId: stadiums_retrieve
-      description: Retrieve a list of stadiums
+      operationId: get_stadiums
+      description: Retrieve a list of all stadiums
       tags:
-      - stadiums
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - Stadiums
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StadiumBase'
+          description: Array of retrieved matches
     post:
-      operationId: stadiums_create
+      operationId: create_stadium
       description: Create a new stadium
       tags:
-      - stadiums
+      - Stadiums
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        description: Supplied token must be of an authorized Manager account
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/StadiumBase'
+        required: true
       responses:
-        '200':
-          description: No response body
+        '201':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Stadium'
+                  - type: object
+                    properties:
+                      matches:
+                        example: []
+          description: 'Added stadium'
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  vip_rows: [This field is required]
+          description: Bad request
   /users/:
     get:
-      operationId: users_retrieve
+      operationId: get_users
       description: Retrieve a list of users
-      tags:
-      - users
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        description: Supplied token must be of an Admin account
+        required: true
+      - in: query
+        name: unauthorized
+        schema:
+          type: boolean
+          default: false
+        description: Retrieve only unauthorized users if set to true
+      - in: query
+        name: users_per_page
+        schema:
+          type: integer
+          default: 20
+      - in: query
+        name: page_number
+        schema:
+          type: integer
+          default: 1
+      tags:
+      - Users
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserBase'
+          description: Array of retrieved users
+    put:
+      operationId: edit_user_profile
+      description: Update user personal info
+      tags:
+      - Users
+      security:
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+               allOf:
+                - $ref: '#/components/schemas/UserBase'
+                - type: object
+                  properties:
+                    username:
+                      readOnly: true
+                    email:
+                      readOnly: true
+                    password:
+                      readOnly: true
+                    role:
+                      readOnly: true
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBase'
+          description: Edited user
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  last_name: [This field is required]
+          description: Bad request
     patch:
-      operationId: users_partial_update
-      description: Update an existing user
+      operationId: change_user_password
+      description: Update user password
       tags:
-      - users
+      - Users
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                old_password:
+                  type: string
+                  format: password
+                  example: $5fka#J3h2
+                new_password:
+                  type: string
+                  format: password
+                  example: dsjf4HS@f
+        required: true
       responses:
-        '200':
+        '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  new_password: [This field is required]
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  old_password: [Incorrect old password]
+          description: Incorrect credentials
     delete:
       operationId: users_destroy
       description: Delete an existing user
       tags:
-      - users
+      - Users
       security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
+      - TokenAuthentication: []
+      parameters:
+      - in: header
+        name: Authentication
+        schema:
+          type: string
+          example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
+        required: true
+        description: Supplied token must be of an Admin account
+      - in: query
+        name: user_id
+        schema:
+          type: string
+          example: 3fa85f6457174562b3fc2c963f66afa6
+        required: true
       responses:
         '204':
           description: No response body
-  /users/authorize/:
-    patch:
-      operationId: users_authorize_partial_update
-      description: Authorize a user
-      tags:
-      - users
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  user_id: [There is no user with the given id]
+          description: There is no user with the given id
 components:
   securitySchemes:
     TokenAuthentication:
       type: http
       scheme: bearer
-      # bearerFormat: JWT
+      bearerFormat: JWT
   schemas:
     HomeTeamEnum:
       enum:
@@ -347,54 +737,133 @@ components:
       - wadi degla sc
       - el entag el harby sc
       type: string
-    Match:
+    CityEnum:
+      enum:
+      - cairo
+      - alexandria
+      - giza
+      - shubra el-kheima
+      - port said
+      - suez
+      - luxor
+      - al-mansura
+      - el-mahalla el-kubra
+      - tanta
+      - asyut
+      - ismailia
+      - fayyum
+      - zagazig
+      - aswan
+      - damietta
+      - damanhur
+      - al-minya
+      - beni suef
+      - qena
+      - sohag
+      - hurghada
+      - 6th of october city
+      - shibin el kom
+      - banha
+      - kafr el-sheikh
+      - arish
+      - mallawi
+      - 10th of ramadan city
+      - bilbais
+      - marsa matruh
+      - idfu
+      - mit ghamr
+      - al-hamidiyya
+      - desouk
+      - qalyub
+      - abu kabir
+      - kafr el-dawwar
+      - girga
+      - akhmim
+      - matareya
+      type: string
+    RoleEnum:
+      enum:
+      - fan
+      - manager
+      - admin
+      type: string
+    GenderEnum:
+      enum:
+      - male
+      - female
+      - other
+      type: string
+    UserBase:
       type: object
       properties:
         _id:
           type: string
           format: uuid
           readOnly: true
-        home_team:
-          $ref: '#/components/schemas/HomeTeamEnum'
-        away_team:
-          $ref: '#/components/schemas/AwayTeamEnum'
-        date:
-          type: string
-          format: date-time
-        referee:
+          example: "3fa85f6457174562b3fc2c963f66afa6"
+        username:
           type: string
           maxLength: 50
-        linesmen:
-          type: array
-          items:
-            type: string
-          minItems: 2
-        match_venue:
-          allOf:
-          - $ref: '#/components/schemas/StadiumBase'
-          readOnly: true
-        seats:
-          type: array
-          items:
-            $ref: '#/components/schemas/SeatBase'
+          example: muhanadAtef23
+        email:
+          type: string
+          format: email
+          example: muhanad96@yahoo.com
+        password:
+          type: string
+          format: password
+          example: $5fka#J3h2
+        first_name:
+          type: string
+          maxLength: 50
+          example: Muhanad
+        last_name:
+          type: string
+          maxLength: 50
+          example: Atef
+        birthdate:
+          type: string
+          format: date
+          description: 'minimum age is 16'
+          example: "1998-02-25"
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        city:
+          $ref: '#/components/schemas/CityEnum'
+        address:
+          type: string
+          maxLength: 200
+          example: Maadi 9th St.
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        authorized:
+          type: boolean
+          default: False
           readOnly: true
       required:
       - _id
-      - away_team
-      - date
-      - home_team
-      - linesmen
-      - match_venue
-      - referee
+      - username
+      - email
+      - password
+      - first_name
+      - last_name
+      - birthdate
+      - gender
+      - city
+      - role
+      - authorized
     SeatBase:
       type: object
       properties:
         ticket_id:
           type: string
           format: uuid
+          readOnly: true
+          example: e415e8a1b8c34482b498f1948b4f936a
         seat_id:
           type: string
           maxLength: 20
+          example: A6
       required:
       - seat_id
       - ticket_id
@@ -404,18 +873,107 @@ components:
         _id:
           type: string
           format: uuid
+          readOnly: true
+          example: 66fdd7c816294870af211aa00a23fe0b
         name:
           type: string
           maxLength: 100
+          example: Borg El Arab Stadium
         capacity:
           type: integer
+          minimum: 1000
+          example: 86000
         vip_seats_per_row:
           type: integer
+          minimum: 10
+          maximum: 50
+          example: 25
         vip_rows:
           type: integer
+          minimum: 1
+          maximum: 20
+          example: 10
       required:
       - _id
       - capacity
       - name
       - vip_rows
       - vip_seats_per_row
+    MatchBase:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 211d75a398e3473ea2bd063b680066dc
+        home_team:
+          $ref: '#/components/schemas/HomeTeamEnum'
+        away_team:
+          $ref: '#/components/schemas/AwayTeamEnum'
+        date:
+          type: string
+          format: date-time
+          example: 2021-03-19T07:00:00Z
+        referee:
+          type: string
+          maxLength: 50
+          example: Lauree Ollerhead
+        linesmen:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+          minItems: 2
+          example: ["Peirce Ritzman", "Maurie Probey"]
+      required:
+      - _id
+      - home_team
+      - away_team
+      - date
+      - referee
+      - linesmen
+    User:
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+        - type: object
+          properties:
+            reservations:
+              type: array
+              items:
+                $ref: '#/components/schemas/SeatBase'
+              readOnly: true
+    Seat:
+      allOf:
+        - $ref: '#/components/schemas/SeatBase'
+        - type: object
+          properties:
+            match:
+              $ref: '#/components/schemas/MatchBase'
+              readOnly: true
+            user:
+              $ref: '#/components/schemas/UserBase'
+              readOnly: true
+    Stadium:
+      allOf:
+        - $ref: '#/components/schemas/StadiumBase'
+        - type: object
+          properties:
+            matches:
+              type: array
+              items:
+                $ref: '#/components/schemas/MatchBase'
+              readOnly: true
+    Match:
+      allOf:
+        - $ref: '#/components/schemas/MatchBase'
+        - type: object
+          properties:
+            match_venue:
+              $ref: '#/components/schemas/StadiumBase'
+              readOnly: true
+            seats:
+              type: array
+              items:
+                $ref: '#/components/schemas/SeatBase'
+              readOnly: true
