@@ -169,7 +169,7 @@ class ReservationView(APIView):
         if not match.match_venue.single().is_valid_seat(seat_id):
             return Response(data={"seat_id": ["Invalid seat_id"]}, status=status.HTTP_400_BAD_REQUEST)
         if not match.is_available_seat(seat_id):
-            return Response(data={"seat_id": ["Seat already reserved"]}, status=status.HTTP_409_CONFLICT)
+            return Response(data={"seat_id": ["Seat is already reserved"]}, status=status.HTTP_409_CONFLICT)
         seat = Seat(seat_id=seat_id).save()
         user = request.user
         user.reservations.connect(seat)

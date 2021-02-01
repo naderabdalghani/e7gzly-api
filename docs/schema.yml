@@ -1,7 +1,10 @@
 openapi: 3.0.3
 info:
   title: E7gzly Docs
+  description: RESTful API for an automated ticket reservation web app for Egyptian Premier League football matches
   version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000
 paths:
   /account/login/:
     post:
@@ -26,7 +29,7 @@ paths:
                 password: m827hf#$
         required: true
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -35,14 +38,14 @@ paths:
                   token:
                     type: string
                     example: 22640f11bb3c01604681120afdec28295d6b5280
-          description: 'Created token key'
-        '401':
+          description: Created token key
+        401:
           content:
             text/plain:
               schema:
                 type: string
                 example: Incorrect credentials
-          description: 'Incorrect credentials'
+          description: Unauthorized. Incorrect credentials
   /account/registration/:
     post:
       operationId: account_registration
@@ -56,7 +59,7 @@ paths:
               $ref: '#/components/schemas/UserBase'
         required: true
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -67,8 +70,8 @@ paths:
                       reservations:
                         example: []
 
-          description: Created user
-        '400':
+          description: User created
+        400:
           content:
             application/json:
               schema:
@@ -80,8 +83,8 @@ paths:
                       type: string
                 example:
                   role: [Cannot create a user with the given role]
-          description: Bad request
-        '409':
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        409:
           content:
             text/plain:
               schema:
@@ -98,7 +101,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -111,9 +114,29 @@ paths:
           example: 3fa85f6457174562b3fc2c963f66afa6
         required: true
       responses:
-        '204':
+        204:
           description: No response body
-        '404':
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token belongs to a non-admin user account
+        404:
           content:
             application/json:
               schema:
@@ -144,7 +167,7 @@ paths:
       tags:
       - Matches
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -152,6 +175,19 @@ paths:
                 items:
                   $ref: '#/components/schemas/Match'
           description: Array of retrieved matches
+        400:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  page_number: [A valid integer is required.]
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
     post:
       operationId: create_match
       description: Create a new match event
@@ -161,7 +197,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -181,7 +217,7 @@ paths:
                       example: 66fdd7c816294870af211aa00a23fe0b
         required: true
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -191,8 +227,8 @@ paths:
                     properties:
                       seats:
                         example: []
-          description: 'Added match'
-        '400':
+          description: Match added
+        400:
           content:
             application/json:
               schema:
@@ -204,8 +240,28 @@ paths:
                       type: string
                 example:
                   away_team: [This field is required]
-          description: Bad request
-        '404':
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account
+        404:
           content:
             application/json:
               schema:
@@ -217,7 +273,7 @@ paths:
                       type: string
                 example:
                   match_venue: [There is no stadium with the given id]
-          description: "Given stadium id doesn't exist"
+          description: Given stadium id doesn't exist
     put:
       operationId: update_match
       description: Update the details of an existing match
@@ -227,7 +283,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -249,13 +305,13 @@ paths:
                       example: 66fdd7c816294870af211aa00a23fe0b
         required: true
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
-          description: 'Edited match'
-        '400':
+          description: Edited match
+        400:
           content:
             application/json:
               schema:
@@ -267,8 +323,28 @@ paths:
                       type: string
                 example:
                   away_team: [This field is required]
-          description: Bad request
-        '404':
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account
+        404:
           content:
             application/json:
               schema:
@@ -280,7 +356,7 @@ paths:
                       type: string
                 example:
                   _id: [There is no match with the given id]
-          description: "Given match/stadium id doesn't exist"
+          description: Given match/stadium id doesn't exist
   /seats/:
     get:
       operationId: get_user_reservations
@@ -291,13 +367,13 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
         required: true
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -305,6 +381,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/Seat'
           description: Array of reserved seats
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
     post:
       operationId: reserve_seat
       description: Reserve a vacant seat for a match
@@ -314,7 +400,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -335,7 +421,7 @@ paths:
                   example: A6
         required: true
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -350,8 +436,8 @@ paths:
                         properties:
                           authorized:
                             example: true
-          description: 'Reserved seat'
-        '400':
+          description: Seat reserved
+        400:
           content:
             application/json:
               schema:
@@ -363,8 +449,28 @@ paths:
                       type: string
                 example:
                   seat_id: [Invalid seat_id]
-          description: Bad request
-        '404':
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token belongs to an unauthorized user account
+        404:
           content:
             application/json:
               schema:
@@ -377,7 +483,7 @@ paths:
                 example:
                   match_id: [There is no match with the given id]
           description: Given match_id doesn't exist
-        '409':
+        409:
           content:
             application/json:
               schema:
@@ -388,18 +494,18 @@ paths:
                     items:
                       type: string
                 example:
-                  seat_id: [Seat already reserved]
-          description: "Given match_id doesn't exist"
+                  seat_id: [Seat is already reserved]
+          description: Seat is already reserved
     delete:
       operationId: cancel_reservation
-      description: Cancel a seat reservation
+      description: Cancel a ticket reservation
       tags:
       - Reservations
       security:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -413,9 +519,32 @@ paths:
           example: e415e8a1b8c34482b498f1948b4f936a
         required: true
       responses:
-        '204':
+        204:
           description: No response body
-        '404':
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticket_id:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  ticket_id: [Reservations can be cancelled in at least 3 days before the corresponding event]
+          description: Permission denied because either the match event for which the ticket is reserved is about to start in less than 3 days or the supplied token belongs to an unauthorized user account
+        404:
           content:
             application/json:
               schema:
@@ -428,19 +557,6 @@ paths:
                 example:
                   ticket_id: [There is no reservation with the given id]
           description: Given ticket_id doesn't exist for the user who submitted the request
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  ticket_id:
-                    type: array
-                    items:
-                      type: string
-                example:
-                  ticket_id: [Reservations can be cancelled in at least 3 days before the corresponding event]
-          description: Reservations can be cancelled in at least 3 days before the corresponding event
   /stadiums/:
     get:
       operationId: get_stadiums
@@ -448,24 +564,24 @@ paths:
       tags:
       - Stadiums
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/StadiumBase'
-          description: Array of retrieved matches
+          description: Array of retrieved stadiums
     post:
-      operationId: create_stadium
-      description: Create a new stadium
+      operationId: add_stadium
+      description: Add a new stadium
       tags:
       - Stadiums
       security:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -478,7 +594,7 @@ paths:
                 $ref: '#/components/schemas/StadiumBase'
         required: true
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
@@ -488,8 +604,8 @@ paths:
                     properties:
                       matches:
                         example: []
-          description: 'Added stadium'
-        '400':
+          description: Stadium added
+        400:
           content:
             application/json:
               schema:
@@ -501,7 +617,27 @@ paths:
                       type: string
                 example:
                   vip_rows: [This field is required]
-          description: Bad request
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account
   /users/:
     get:
       operationId: get_users
@@ -510,7 +646,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -535,7 +671,7 @@ paths:
       tags:
       - Users
       responses:
-        '200':
+        200:
           content:
             application/json:
               schema:
@@ -543,6 +679,39 @@ paths:
                 items:
                   $ref: '#/components/schemas/UserBase'
           description: Array of retrieved users
+        400:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  page_number: [A valid integer is required.]
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token belongs to a non-admin user account
     put:
       operationId: edit_user_profile
       description: Update user personal info
@@ -552,7 +721,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -575,13 +744,13 @@ paths:
                       readOnly: true
         required: true
       responses:
-        '201':
+        201:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserBase'
           description: Edited user
-        '400':
+        400:
           content:
             application/json:
               schema:
@@ -593,7 +762,17 @@ paths:
                       type: string
                 example:
                   last_name: [This field is required]
-          description: Bad request
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
     patch:
       operationId: change_user_password
       description: Update user password
@@ -603,7 +782,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -623,9 +802,9 @@ paths:
                   example: dsjf4HS@f
         required: true
       responses:
-        '204':
+        204:
           description: No response body
-        '400':
+        400:
           content:
             application/json:
               schema:
@@ -637,8 +816,18 @@ paths:
                       type: string
                 example:
                   new_password: [This field is required]
-          description: Bad request
-        '403':
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
           content:
             application/json:
               schema:
@@ -660,7 +849,7 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: header
-        name: Authentication
+        name: Authorization
         schema:
           type: string
           example: Bearer 22640f11bb3c01604681120afdec28295d6b5280
@@ -673,9 +862,29 @@ paths:
           example: 3fa85f6457174562b3fc2c963f66afa6
         required: true
       responses:
-        '204':
+        204:
           description: No response body
-        '404':
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied token belongs to a non-admin user account
+        404:
           content:
             application/json:
               schema:
@@ -716,10 +925,11 @@ components:
       - wadi degla sc
       - el entag el harby sc
       type: string
+      example: al ahly sc
     AwayTeamEnum:
       enum:
-      - zamalek sc
       - al ahly sc
+      - zamalek sc
       - el gouna fc
       - al masry sc
       - pyramids fc
@@ -737,6 +947,7 @@ components:
       - wadi degla sc
       - el entag el harby sc
       type: string
+      example: zamalek sc
     CityEnum:
       enum:
       - cairo
@@ -800,7 +1011,7 @@ components:
           type: string
           format: uuid
           readOnly: true
-          example: "3fa85f6457174562b3fc2c963f66afa6"
+          example: 3fa85f6457174562b3fc2c963f66afa6
         username:
           type: string
           maxLength: 50
@@ -824,8 +1035,8 @@ components:
         birthdate:
           type: string
           format: date
-          description: 'minimum age is 16'
-          example: "1998-02-25"
+          description: minimum age is 16
+          example: 1998-02-28
         gender:
           $ref: '#/components/schemas/GenderEnum'
         city:
@@ -925,7 +1136,7 @@ components:
             type: string
             maxLength: 50
           minItems: 2
-          example: ["Peirce Ritzman", "Maurie Probey"]
+          example: [Peirce Ritzman, Maurie Probey]
       required:
       - _id
       - home_team
