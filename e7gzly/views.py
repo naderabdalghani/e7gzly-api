@@ -238,7 +238,9 @@ class UserView(APIView):
         page_number = serializer.validated_data['page_number']
         users = User.nodes
         if unauthorized:
-            users = users.filter(authorized=False)
+            users = users.filter(authorized=False, role__ne='admin')
+        else:
+            users = users.filter(role__ne='admin')
         paginator = Paginator(users, users_per_page)
         try:
             users = paginator.page(page_number)
