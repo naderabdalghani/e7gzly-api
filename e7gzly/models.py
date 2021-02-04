@@ -54,11 +54,10 @@ class Match(StructuredNode):
     seats = RelationshipFrom("Seat", "FOR")
 
     def is_available_seat(self, seat_id):
-        reserved_seats = self.seats.all()
-        for seat in reserved_seats:
-            if seat_id == seat.seat_id:
-                return False
-        return True
+        reserved_seat = self.seats.filter(seat_id=seat_id)
+        if reserved_seat is None:
+            return True
+        return False
 
 
 class Token(StructuredNode):
