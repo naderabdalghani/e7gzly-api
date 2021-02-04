@@ -1,3 +1,5 @@
+# python .\venv\Scripts\neomodel_install_labels manage.py e7gzly.models --db bolt://neo4j:0123456789@localhost:7687
+# python .\venv\Scripts\neomodel_remove_labels --db bolt://neo4j:0123456789@localhost:7687
 import binascii
 import os
 from neomodel import StructuredNode, StringProperty, EmailProperty, DateTimeProperty, DateProperty, IntegerProperty, \
@@ -14,7 +16,6 @@ class Seat(StructuredNode):
 
 
 class User(StructuredNode):
-    _id = UniqueIdProperty()
     username = StringProperty(required=True, max_length=NAME_MAX_LEN, unique_index=True)
     email = EmailProperty(required=True, unique_index=True)
     password = StringProperty(required=True)
@@ -28,25 +29,6 @@ class User(StructuredNode):
     authorized = BooleanProperty(default=False)
     reservations = RelationshipTo('Seat', 'RESERVED_A')
     token = RelationshipTo('Token', 'BEARS_A', cardinality=ZeroOrOne)
-
-    def update(self, data):
-        self.first_name = data['first_name']
-        self.last_name = data['last_name']
-        self.birthdate = data['birthdate']
-        self.gender = data['gender']
-        self.city = data['city']
-        self.address = data.get('address', None)
-        if hasattr(self, 'deleted') and self.deleted:
-            raise ValueError("{0}.save() attempted on deleted node".format(self.__class__.__name__))
-        if hasattr(self, 'id'):
-            params = self.deflate(self.__properties__, self)
-            params.pop('_id')
-            query = "MATCH (n) WHERE id(n)=$self \n"
-            query += "\n".join(["SET n.{0} = ${1}".format(key, key) + "\n" for key in params.keys()])
-            for label in self.inherited_labels():
-                query += "SET n:`{0}`\n".format(label)
-            self.cypher(query, params)
-        return self
 
 
 class Stadium(StructuredNode):

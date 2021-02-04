@@ -11,7 +11,7 @@ from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
     ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
-    UserEditingSerializer, ChangePasswordSerializer
+    UserEditingSerializer, ChangePasswordSerializer, UserAuthorizationSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest, IsPatchRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -43,14 +43,14 @@ class AuthorizationView(APIView):
         """
         Authorize a user
         """
+        serializer = UserAuthorizationSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['user']
         try:
-            user_id = request.query_params['user_id']
-        except KeyError:
-            return Response(data={"user_id": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user = User.nodes.get(_id=user_id)
+            user = User.nodes.get(username=username)
         except User.DoesNotExist:
-            return Response(data={"user_id": ["There is no user with the given id"]}, status=status.HTTP_404_NOT_FOUND)
+            return Response(data={"user": ["There is no user with the given username"]},
+                            status=status.HTTP_404_NOT_FOUND)
         user.authorized = True
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -268,7 +268,14 @@ class UserView(APIView):
         """
         serializer = UserEditingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = request.user.update(serializer.validated_data)
+        user = request.user
+        user.first_name = serializer.validated_data['first_name']
+        user.last_name = serializer.validated_data['last_name']
+        user.birthdate = serializer.validated_data['birthdate']
+        user.gender = serializer.validated_data['gender']
+        user.city = serializer.validated_data['city']
+        user.address = serializer.validated_data.get('address', None)
+        user.save()
         return Response(data=UserBaseSerializer(user).data, status=status.HTTP_200_OK)
 
     def delete(self, request):
@@ -277,11 +284,11 @@ class UserView(APIView):
         """
         serializer = UserDeletionSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-        user_id = serializer.validated_data['user_id']
+        username = serializer.validated_data['user']
         try:
-            user = User.nodes.get(_id=user_id.hex)
+            user = User.nodes.get(username=username)
         except User.DoesNotExist:
-            return Response(data={"user_id": ["There is no user with the given id"]},
+            return Response(data={"user": ["There is no user with the given username"]},
                             status=status.HTTP_404_NOT_FOUND)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

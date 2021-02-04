@@ -8,7 +8,6 @@ from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAM
 
 
 class UserBaseSerializer(serializers.Serializer):
-    _id = serializers.UUIDField(allow_null=False, read_only=True)
     username = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
     email = serializers.EmailField(required=True, allow_null=False, allow_blank=False)
     password = serializers.CharField(required=True, allow_null=False, allow_blank=False)
@@ -147,7 +146,11 @@ class MatchesRetrievalSerializer(serializers.Serializer):
 
 
 class UserDeletionSerializer(serializers.Serializer):
-    user_id = serializers.UUIDField(required=True, allow_null=False)
+    user = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
+
+
+class UserAuthorizationSerializer(serializers.Serializer):
+    user = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
 
 
 class UserEditingSerializer(serializers.Serializer):
