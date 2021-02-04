@@ -67,7 +67,7 @@ class Match(StructuredNode):
 
     def is_available_seat(self, seat_id):
         reserved_seat = self.seats.filter(seat_id=seat_id)
-        if reserved_seat is None:
+        if len(reserved_seat) == 0:
             return True
         return False
 
