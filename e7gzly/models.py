@@ -44,7 +44,7 @@ class Stadium(StructuredNode):
 
 
 class Match(StructuredNode):
-    _id = UniqueIdProperty()
+    match_id = UniqueIdProperty()
     home_team = StringProperty(required=True, choices=TEAMS)
     away_team = StringProperty(required=True, choices=TEAMS)
     date = DateTimeProperty(required=True)
@@ -52,24 +52,6 @@ class Match(StructuredNode):
     linesmen = ArrayProperty(StringProperty(max_length=NAME_MAX_LEN), required=True)
     match_venue = RelationshipTo('Stadium', 'HOSTED_IN', cardinality=One)
     seats = RelationshipFrom("Seat", "FOR")
-
-    def update(self, data):
-        self.home_team = data['home_team']
-        self.away_team = data['away_team']
-        self.date = data['date']
-        self.referee = data['referee']
-        self.linesmen = data['linesmen']
-        if hasattr(self, 'deleted') and self.deleted:
-            raise ValueError("{0}.save() attempted on deleted node".format(self.__class__.__name__))
-        if hasattr(self, 'id'):
-            params = self.deflate(self.__properties__, self)
-            params.pop('_id')
-            query = "MATCH (n) WHERE id(n)=$self \n"
-            query += "\n".join(["SET n.{0} = ${1}".format(key, key) + "\n" for key in params.keys()])
-            for label in self.inherited_labels():
-                query += "SET n:`{0}`\n".format(label)
-            self.cypher(query, params)
-        return self
 
     def is_available_seat(self, seat_id):
         reserved_seats = self.seats.all()

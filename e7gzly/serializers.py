@@ -30,7 +30,7 @@ class UserBaseSerializer(serializers.Serializer):
 
 
 class MatchBaseSerializer(serializers.Serializer):
-    _id = serializers.UUIDField(allow_null=False, read_only=True)
+    match_id = serializers.UUIDField(allow_null=False, read_only=True)
     home_team = serializers.ChoiceField(required=True, choices=TEAMS, allow_null=False, allow_blank=False)
     away_team = serializers.ChoiceField(required=True, choices=TEAMS, allow_null=False, allow_blank=False)
     date = serializers.DateTimeField(required=True, allow_null=False)

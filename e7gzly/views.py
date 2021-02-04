@@ -101,24 +101,30 @@ class MatchView(APIView):
         """
         Update the details of an existing match
         """
-        match_id = request.data.pop('_id', None)
+        match_id = request.data.pop('match_id', None)
         if match_id is None:
-            return Response(data={"_id": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"match_id": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
         stadium_id = request.data.pop('match_venue', None)
         if stadium_id is None:
             return Response(data={"match_venue": ["This field is required"]}, status=status.HTTP_400_BAD_REQUEST)
         serializer = MatchBaseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            match = Match.nodes.get(_id=match_id)
+            match = Match.nodes.get(match_id=match_id)
         except Match.DoesNotExist:
-            return Response(data={"_id": ["There is no match with the given id"]}, status=status.HTTP_404_NOT_FOUND)
+            return Response(data={"match_id": ["There is no match with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
         try:
             stadium = Stadium.nodes.get(_id=stadium_id)
         except Stadium.DoesNotExist:
             return Response(data={"match_venue": ["There is no stadium with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
-        match = match.update(serializer.validated_data)
+        match.home_team = serializer.validated_data['home_team']
+        match.away_team = serializer.validated_data['away_team']
+        match.date = serializer.validated_data['date']
+        match.referee = serializer.validated_data['referee']
+        match.linesmen = serializer.validated_data['linesmen']
+        match.save()
         match.match_venue.reconnect(match.match_venue.single(), stadium)
         return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
 
@@ -162,7 +168,7 @@ class ReservationView(APIView):
         match_id = serializer.validated_data['match_id']
         seat_id = serializer.validated_data['seat_id']
         try:
-            match = Match.nodes.get(_id=match_id.hex)
+            match = Match.nodes.get(match_id=match_id.hex)
         except Match.DoesNotExist:
             return Response(data={"match_id": ["There is no match with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
