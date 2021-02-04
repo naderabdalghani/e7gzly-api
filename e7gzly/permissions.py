@@ -61,4 +61,4 @@ class IsAuthorized(BasePermission):
     def has_permission(self, request, view):
         if type(request.user) is not User:
             raise NotAuthenticated
-        return bool(request.user.authorized)
+        return bool(request.user.authorized or request.user.role == 'admin')
