@@ -32,7 +32,7 @@ class User(StructuredNode):
 
 
 class Stadium(StructuredNode):
-    _id = UniqueIdProperty()
+    stadium_id = UniqueIdProperty()
     name = StringProperty(required=True, max_length=STADIUM_NAME_MAX_LEN, unique_index=True)
     capacity = IntegerProperty(required=True)
     vip_seats_per_row = IntegerProperty(required=True)

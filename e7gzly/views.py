@@ -89,7 +89,7 @@ class MatchView(APIView):
         serializer = MatchBaseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            stadium = Stadium.nodes.get(_id=stadium_id)
+            stadium = Stadium.nodes.get(stadium_id=stadium_id)
         except Stadium.DoesNotExist:
             return Response(data={"match_venue": ["There is no stadium with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
@@ -115,7 +115,7 @@ class MatchView(APIView):
             return Response(data={"match_id": ["There is no match with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
         try:
-            stadium = Stadium.nodes.get(_id=stadium_id)
+            stadium = Stadium.nodes.get(stadium_id=stadium_id)
         except Stadium.DoesNotExist:
             return Response(data={"match_venue": ["There is no stadium with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
