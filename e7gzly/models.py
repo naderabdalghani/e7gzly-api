@@ -2,10 +2,13 @@
 # python .\venv\Scripts\neomodel_remove_labels --db bolt://neo4j:0123456789@localhost:7687
 import binascii
 import os
+import re
+
 from neomodel import StructuredNode, StringProperty, EmailProperty, DateTimeProperty, DateProperty, IntegerProperty, \
     ArrayProperty, RelationshipTo, One, ZeroOrOne, UniqueIdProperty, RelationshipFrom, BooleanProperty
 from .constants import NAME_MAX_LEN, STADIUM_NAME_MAX_LEN, CITIES, GENDERS, TEAMS, ROLES, SEAT_ID_MAX_LEN, \
     ADDRESS_MAX_LEN, TOKEN_MAX_LEN
+from .utilities import row_to_number
 
 
 class Seat(StructuredNode):
@@ -40,6 +43,15 @@ class Stadium(StructuredNode):
     matches = RelationshipFrom("Match", "HOSTED_IN")
 
     def is_valid_seat(self, seat_id):
+        seat_id = seat_id.upper()
+        try:
+            string_match_object = re.match("^([A-Z]+)([0-9]+)$", seat_id)
+            row = string_match_object.group(1)
+            seat = string_match_object.group(2)
+            if row_to_number(row) >= self.vip_rows or int(seat) >= self.vip_seats_per_row:
+                return False
+        except (AttributeError, IndexError):
+            return False
         return True
 
 
