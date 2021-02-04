@@ -101,10 +101,11 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: query
-        name: user_id
+        name: user
+        description: Username of the user to be authorized
         schema:
           type: string
-          example: 3fa85f6457174562b3fc2c963f66afa6
+          example: muhanadAtef23
         required: true
       responses:
         204:
@@ -140,8 +141,8 @@ paths:
                     items:
                       type: string
                 example:
-                  user_id: [There is no user with the given id]
-          description: There is no user with the given id.
+                  user: [There is no user with the given username]
+          description: There is no user with the given username.
   /matches/:
     get:
       operationId: get_matches
@@ -274,7 +275,7 @@ paths:
                 - $ref: '#/components/schemas/MatchBase'
                 - type: object
                   properties:
-                    _id:
+                    match_id:
                       readOnly: false
                     match_venue:
                       type: string
@@ -327,12 +328,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  _id:
+                  match_id:
                     type: array
                     items:
                       type: string
                 example:
-                  _id: [There is no match with the given id]
+                  match_id: [There is no match with the given id]
           description: Given match/stadium id doesn't exist.
   /seats/:
     get:
@@ -588,7 +589,7 @@ paths:
   /users/:
     get:
       operationId: get_users
-      description: Retrieve a list of users. Supplied token **must** be of an *Admin* account.
+      description: Retrieve a list of users.<br><br> Supplied token **must** be of an *Admin* account.
       security:
       - TokenAuthentication: []
       parameters:
@@ -767,7 +768,7 @@ paths:
                   old_password: [Incorrect old password]
           description: Incorrect credentials
     delete:
-      operationId: users_destroy
+      operationId: delete_user
       description: Delete an existing user.<br><br> Supplied token **must** be of an *Admin* account.
       tags:
       - Users
@@ -775,10 +776,10 @@ paths:
       - TokenAuthentication: []
       parameters:
       - in: query
-        name: user_id
+        name: user
         schema:
           type: string
-          example: 3fa85f6457174562b3fc2c963f66afa6
+          example: muhanadAtef23
         required: true
       responses:
         204:
@@ -814,8 +815,8 @@ paths:
                     items:
                       type: string
                 example:
-                  user_id: [There is no user with the given id]
-          description: There is no user with the given id.
+                  user: [There is no user with the given username]
+          description: There is no user with the given username.
 components:
   securitySchemes:
     TokenAuthentication:
@@ -926,11 +927,6 @@ components:
     UserBase:
       type: object
       properties:
-        _id:
-          type: string
-          format: uuid
-          readOnly: true
-          example: 3fa85f6457174562b3fc2c963f66afa6
         username:
           type: string
           maxLength: 50
@@ -971,7 +967,6 @@ components:
           default: False
           readOnly: true
       required:
-      - _id
       - username
       - email
       - password
@@ -1000,7 +995,7 @@ components:
     StadiumBase:
       type: object
       properties:
-        _id:
+        stadium_id:
           type: string
           format: uuid
           readOnly: true
@@ -1024,7 +1019,7 @@ components:
           maximum: 20
           example: 10
       required:
-      - _id
+      - stadium_id
       - capacity
       - name
       - vip_rows
@@ -1032,7 +1027,7 @@ components:
     MatchBase:
       type: object
       properties:
-        _id:
+        match_id:
           type: string
           format: uuid
           readOnly: true
@@ -1057,7 +1052,7 @@ components:
           minItems: 2
           example: [Peirce Ritzman, Maurie Probey]
       required:
-      - _id
+      - match_id
       - home_team
       - away_team
       - date
