@@ -28,7 +28,12 @@ class RegistrationView(APIView):
         user_data['password'] = make_password(user_data['password'])
         try:
             user = User.create(user_data)[0]
-            return Response(data=UserSerializer(user).data, status=status.HTTP_201_CREATED)
+            token = Token().save()
+            user.token.connect(token)
+            return Response(data={
+                'token': token.key,
+                'role': user.role
+            }, status=status.HTTP_201_CREATED)
         except UniqueProperty as e:
             if 'username' in e.message:
                 return Response(data="A user with the given username already exists", status=status.HTTP_409_CONFLICT)
@@ -225,7 +230,10 @@ class LoggingInView(ObtainAuthToken):
             token.delete()
         token = Token().save()
         user.token.connect(token)
-        return Response(data={'token': token.key}, status=status.HTTP_200_OK)
+        return Response(data={
+            'token': token.key,
+            'role': user.role
+        }, status=status.HTTP_200_OK)
 
 
 class UserView(APIView):
