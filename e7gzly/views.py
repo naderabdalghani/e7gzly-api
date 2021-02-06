@@ -82,10 +82,10 @@ class MatchView(APIView):
         paginator = Paginator(matches, matches_per_page)
         try:
             matches = paginator.page(page_number)
-        except (PageNotAnInteger, InvalidPage):
+        except PageNotAnInteger:
             matches = paginator.page(1)
-        except EmptyPage:
-            matches = paginator.page(paginator.num_pages)
+        except InvalidPage:
+            matches = []
         matches = MatchOverviewSerializer(matches, many=True).data
         return Response(data=matches, status=status.HTTP_200_OK)
 
@@ -266,10 +266,10 @@ class UserView(APIView):
         paginator = Paginator(users, users_per_page)
         try:
             users = paginator.page(page_number)
-        except (PageNotAnInteger, InvalidPage):
+        except PageNotAnInteger:
             users = paginator.page(1)
-        except EmptyPage:
-            users = paginator.page(paginator.num_pages)
+        except InvalidPage:
+            users = []
         users = UserBaseSerializer(users, many=True).data
         return Response(data=users, status=status.HTTP_200_OK)
 
