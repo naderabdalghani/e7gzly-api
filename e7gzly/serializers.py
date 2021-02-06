@@ -91,6 +91,16 @@ class MatchSerializer(MatchBaseSerializer):
         return new_representation
 
 
+class MatchOverviewSerializer(MatchBaseSerializer):
+    match_venue = serializers.CharField(allow_null=False, allow_blank=False, max_length=STADIUM_NAME_MAX_LEN,
+                                        read_only=True)
+
+    def to_representation(self, instance):
+        instance.match_venue = instance.match_venue.single().name
+        new_representation = super().to_representation(instance)
+        return new_representation
+
+
 class UserSerializer(UserBaseSerializer):
     reservations = SeatBaseSerializer(read_only=True, many=True)
 

@@ -11,7 +11,7 @@ from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
     ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
-    UserEditingSerializer, ChangePasswordSerializer, UserAuthorizationSerializer
+    UserEditingSerializer, ChangePasswordSerializer, UserAuthorizationSerializer, MatchOverviewSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest, IsPatchRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -86,7 +86,7 @@ class MatchView(APIView):
             matches = paginator.page(1)
         except EmptyPage:
             matches = paginator.page(paginator.num_pages)
-        matches = MatchSerializer(matches, many=True).data
+        matches = MatchOverviewSerializer(matches, many=True).data
         return Response(data=matches, status=status.HTTP_200_OK)
 
     def post(self, request):

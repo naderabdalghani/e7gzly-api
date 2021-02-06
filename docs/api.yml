@@ -173,9 +173,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Match'
+                allOf:
+                - $ref: '#/components/schemas/MatchBase'
+                - type: object
+                  properties:
+                    match_venue:
+                      type: string
+                      example: Petro Sport Stadium
           description: Array of retrieved matches.
         400:
           content:
@@ -1046,7 +1050,6 @@ components:
           $ref: '#/components/schemas/AwayTeamEnum'
         date:
           type: string
-          format: date-time
           example: 2021-03-19T07:00:00Z
         referee:
           type: string
