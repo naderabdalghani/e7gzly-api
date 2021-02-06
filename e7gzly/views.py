@@ -18,6 +18,9 @@ from django.contrib.auth.hashers import make_password, check_password
 
 
 class RegistrationView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
     def post(self, request):
         """
         Register a new unauthorized user
@@ -213,6 +216,9 @@ class ReservationView(APIView):
 
 
 class LoggingInView(ObtainAuthToken):
+    authentication_classes = []
+    permission_classes = []
+
     def post(self, request, *args, **kwargs):
         """
         Authenticate a user and provide an access token
