@@ -38,7 +38,9 @@ paths:
                   token:
                     type: string
                     example: 22640f11bb3c01604681120afdec28295d6b5280
-          description: Created token key.
+                  role:
+                    $ref: '#/components/schemas/RoleEnum'
+          description: Authorization token key and logged in user type.
         401:
           content:
             text/plain:
@@ -63,14 +65,14 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/User'
-                  - type: object
-                    properties:
-                      reservations:
-                        example: []
-
-          description: User created
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 22640f11bb3c01604681120afdec28295d6b5280
+                  role:
+                    $ref: '#/components/schemas/RoleEnum'
+          description: Authorization token key and created user type.
         400:
           content:
             application/json:
