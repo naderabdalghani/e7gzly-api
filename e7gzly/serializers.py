@@ -140,8 +140,8 @@ class SeatReservationSerializer(serializers.Serializer):
     seat_id = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=SEAT_ID_MAX_LEN)
 
 
-class ReservationCancellationSerializer(serializers.Serializer):
-    ticket_id = serializers.UUIDField(required=True, allow_null=False)
+class IdSerializer(serializers.Serializer):
+    id = serializers.UUIDField(required=True, allow_null=False)
 
 
 class UsersRetrievalSerializer(serializers.Serializer):

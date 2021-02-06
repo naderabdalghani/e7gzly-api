@@ -8,9 +8,9 @@ from rest_framework import status
 from rest_condition import And, Or
 from .models import Match, Stadium, User, Token, Seat
 from .constants import TICKET_CANCELLATION_WINDOW
-from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, UserSerializer, \
+from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
-    ReservationCancellationSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
+    IdSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
     UserEditingSerializer, ChangePasswordSerializer, UserAuthorizationSerializer, MatchOverviewSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest, IsPatchRequest
@@ -196,21 +196,17 @@ class ReservationView(APIView):
         """
         Cancel a reservation
         """
-        serializer = ReservationCancellationSerializer(data=request.query_params)
+        serializer = IdSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         user = request.user
         try:
-            reservation = user.reservations.get(ticket_id=serializer.validated_data['ticket_id'].hex)
+            reservation = user.reservations.get(ticket_id=serializer.validated_data['id'].hex)
         except Seat.DoesNotExist:
-            return Response(data={"ticket_id": ["There is no reservation with the given id"]},
+            return Response(data={"id": ["There is no reservation with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
         if timezone.now() > reservation.match.single().date - timezone.timedelta(days=TICKET_CANCELLATION_WINDOW):
-            return Response(data={
-                "ticket_id": [
-                    "Reservations can be cancelled in at least {} days before the corresponding event"
-                    .format(TICKET_CANCELLATION_WINDOW)
-                ]
-            }, status=status.HTTP_403_FORBIDDEN)
+            return Response(data="Reservations can be cancelled in at least {} days before the corresponding event"
+                            .format(TICKET_CANCELLATION_WINDOW), status=status.HTTP_403_FORBIDDEN)
         reservation.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
