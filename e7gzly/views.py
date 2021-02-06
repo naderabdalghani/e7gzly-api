@@ -1,4 +1,4 @@
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage, InvalidPage
+from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage
 from django.utils import timezone
 from neomodel import UniqueProperty
 from rest_framework.authtoken.views import ObtainAuthToken

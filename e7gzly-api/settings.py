@@ -40,7 +40,6 @@ NEOMODEL_MAX_POOL_SIZE = 50
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
