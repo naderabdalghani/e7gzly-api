@@ -36,9 +36,11 @@ class RegistrationView(APIView):
             }, status=status.HTTP_201_CREATED)
         except UniqueProperty as e:
             if 'username' in e.message:
-                return Response(data="A user with the given username already exists", status=status.HTTP_409_CONFLICT)
+                return Response(data={"username": ["A user with the given username already exists"]},
+                                status=status.HTTP_409_CONFLICT)
             if 'email' in e.message:
-                return Response(data="A user with the given email already exists", status=status.HTTP_409_CONFLICT)
+                return Response(data={"email": ["A user with the given email already exists"]},
+                                status=status.HTTP_409_CONFLICT)
 
 
 class AuthorizationView(APIView):

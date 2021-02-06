@@ -88,10 +88,16 @@ paths:
           description: Bad request. Some field is missing or doesn't comply with a logical constraint.
         409:
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: A user with the given username already exists
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  username: [A user with the given username already exists]
           description: A user with the given username/email already exists.
   /users/authorize/:
     patch:
