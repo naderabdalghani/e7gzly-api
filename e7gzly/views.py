@@ -139,6 +139,24 @@ class MatchView(APIView):
         return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
 
 
+class MatchDetailsView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        """
+        Retrieve match details
+        """
+        serializer = IdSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        try:
+            match = Match.nodes.get(match_id=serializer.validated_data['id'].hex)
+        except Match.DoesNotExist:
+            return Response(data={"id": ["There is no match with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        return Response(data=MatchSerializer(match), status=status.HTTP_200_OK)
+
+
 class StadiumView(APIView):
     permission_classes = [Or(IsReadOnlyRequest,
                              And(IsPostRequest, Or(And(IsManager, IsAuthorized), IsAdmin)))]

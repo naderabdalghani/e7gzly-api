@@ -22,6 +22,7 @@ urlpatterns = [
     path('account/authorization/', AuthorizationView.as_view(), name='authorization'),
     path('users/', UserView.as_view(), name='users'),
     path('matches/', MatchView.as_view(), name='matches'),
+    path('match/', MatchDetailsView.as_view(), name='match details'),
     path('stadiums/', StadiumView.as_view(), name='stadiums'),
     path('reservations/', ReservationView.as_view(), name='reservations')
 ]
