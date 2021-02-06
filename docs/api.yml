@@ -99,10 +99,10 @@ paths:
                 example:
                   username: [A user with the given username already exists]
           description: A user with the given username/email already exists.
-  /users/authorize/:
+  /account/authorization/:
     patch:
       operationId: authorize_account
-      description: Authorize a user account.<br><br> Supplied token **must** be of an *Admin* account.
+      description: Authorize a user account.<br><br> Supplied authorization token **must** be of an *Admin* account.
       tags:
       - Account
       security:
@@ -137,7 +137,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to a non-admin user account.
+          description: Permission denied. The supplied authorization token belongs to a non-admin user account.
         404:
           content:
             application/json:
@@ -196,7 +196,7 @@ paths:
           description: Bad request. Some field is missing or doesn't comply with a logical constraint.
     post:
       operationId: create_match
-      description: Create a new match event.<br><br> Supplied token **must** be of an *authorized Manager* account.
+      description: Create a new match event.<br><br> Supplied authorization token **must** be of an *authorized Manager* account.
       tags:
       - Matches
       security:
@@ -258,7 +258,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account.
+          description: Permission denied. The supplied authorization token either belongs to a non-manager user account or an unauthorized manager account.
         404:
           content:
             application/json:
@@ -274,7 +274,7 @@ paths:
           description: Given stadium id doesn't exist.
     put:
       operationId: update_match
-      description: Update the details of an existing match.<br><br> Supplied token **must** be of an *authorized Manager* account.
+      description: Update the details of an existing match.<br><br> Supplied authorization token **must** be of an *authorized Manager* account.
       tags:
       - Matches
       security:
@@ -333,7 +333,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account.
+          description: Permission denied. The supplied authorization token either belongs to a non-manager user account or an unauthorized manager account.
         404:
           content:
             application/json:
@@ -347,7 +347,54 @@ paths:
                 example:
                   match_id: [There is no match with the given id]
           description: Given match/stadium id doesn't exist.
-  /seats/:
+  /match/:
+    get:
+      operationId: get_match_details
+      description: Retrieve match details.
+      parameters:
+      - in: query
+        name: id
+        description: Id of the match of which details may be retrieved.
+        schema:
+          type: string
+          format: uuid
+          example: 211d75a398e3473ea2bd063b680066dc
+      tags:
+      - Matches
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+          description: Retrieved match.
+        400:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  id: [This field is required]
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  id: [There is no match with the given id]
+          description: There is no match with the given id.
+  /reservations/:
     get:
       operationId: get_user_reservations
       description: Retrieve reserved seats for a user.
@@ -376,7 +423,7 @@ paths:
           description: Unauthorized. Could be an invalid/missing user token.
     post:
       operationId: reserve_seat
-      description: Reserve a vacant seat for a match.<br><br> Provided token key **must** belong to an *authorized User* i.e `User.authorized = true`.
+      description: Reserve a vacant seat for a match.<br><br> Provided authorization token key **must** belong to an *authorized User* i.e `User.authorized = true`.
       tags:
       - Reservations
       security:
@@ -444,7 +491,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to an unauthorized user account.
+          description: Permission denied. The supplied authorization token belongs to an unauthorized user account.
         404:
           content:
             application/json:
@@ -473,14 +520,15 @@ paths:
           description: Seat is already reserved.
     delete:
       operationId: cancel_reservation
-      description: Cancel a ticket reservation.<br><br> Token key **must** belong to an *authorized User* i.e `User.authorized = true`.
+      description: Cancel a ticket reservation.<br><br> Provided authorization token key **must** belong to an *authorized User* i.e `User.authorized = true`.
       tags:
       - Reservations
       security:
       - TokenAuthentication: []
       parameters:
       - in: query
-        name: ticket_id
+        name: id
+        description: Id of the ticket to be deleted.
         schema:
           type: string
           format: uuid
@@ -501,29 +549,23 @@ paths:
           description: Unauthorized. Could be an invalid/missing user token.
         403:
           content:
-            application/json:
+            text/plain:
               schema:
-                type: object
-                properties:
-                  ticket_id:
-                    type: array
-                    items:
-                      type: string
-                example:
-                  ticket_id: [Reservations can be cancelled in at least 3 days before the corresponding event]
-          description: Permission denied because either the match event for which the ticket is reserved is about to start in less than 3 days or the supplied token belongs to an unauthorized user account.
+                type: string
+                example: Reservations can be cancelled in at least 3 days before the corresponding event
+          description: Permission denied because either the match event for which the ticket is reserved is about to start in less than 3 days or the supplied authorization token belongs to an unauthorized user account.
         404:
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  ticket_id:
+                  id:
                     type: array
                     items:
                       type: string
                 example:
-                  ticket_id: [There is no reservation with the given id]
+                  id: [There is no reservation with the given id]
           description: Given ticket_id doesn't exist for the user who submitted the request.
   /stadiums/:
     get:
@@ -542,7 +584,7 @@ paths:
           description: Array of retrieved stadiums
     post:
       operationId: add_stadium
-      description: Add a new stadium.<br><br> Supplied token **must** be of an authorized *Manager* account.
+      description: Add a new stadium.<br><br> Supplied authorization token **must** be of an authorized *Manager* account.
       tags:
       - Stadiums
       security:
@@ -597,11 +639,11 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token either belongs to a non-manager user account or an unauthorized manager account.
+          description: Permission denied. The supplied authorization token either belongs to a non-manager user account or an unauthorized manager account.
   /users/:
     get:
       operationId: get_users
-      description: Retrieve a list of users.<br><br> Supplied token **must** be of an *Admin* account.
+      description: Retrieve a list of users.<br><br> Supplied authorization token **must** be of an *Admin* account.
       security:
       - TokenAuthentication: []
       parameters:
@@ -664,7 +706,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to a non-admin user account.
+          description: Permission denied. The supplied authorization token belongs to a non-admin user account.
     put:
       operationId: edit_user_profile
       description: Update user personal info.
@@ -781,7 +823,7 @@ paths:
           description: Incorrect credentials
     delete:
       operationId: delete_user
-      description: Delete an existing user.<br><br> Supplied token **must** be of an *Admin* account.
+      description: Delete an existing user.<br><br> Supplied authorization token **must** be of an *Admin* account.
       tags:
       - Users
       security:
@@ -815,7 +857,7 @@ paths:
                   detail:
                     type: string
                     example: You do not have permission to perform this action.
-          description: Permission denied. The supplied token belongs to a non-admin user account.
+          description: Permission denied. The supplied authorization token belongs to a non-admin user account.
         404:
           content:
             application/json:
