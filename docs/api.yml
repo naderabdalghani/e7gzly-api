@@ -4,7 +4,7 @@ info:
   description: RESTful API for an automated ticket reservation web app for Egyptian Premier League football matches
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:8000
+  - url: http://bfa5edf60586.ngrok.io
 paths:
   /account/login/:
     post:
