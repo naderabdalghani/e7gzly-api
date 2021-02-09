@@ -265,7 +265,7 @@ class UserView(APIView):
 
     def get(self, request):
         """
-        Retrieve a list of users
+        Retrieve a list of users and the number of all users with the given authorization criterion
         """
         serializer = UsersRetrievalSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
@@ -277,6 +277,7 @@ class UserView(APIView):
             users = users.filter(authorized=False, role__ne='admin')
         else:
             users = users.filter(role__ne='admin')
+        count = len(users)
         paginator = Paginator(users, users_per_page)
         try:
             users = paginator.page(page_number)
@@ -285,7 +286,10 @@ class UserView(APIView):
         except InvalidPage:
             users = []
         users = UserBaseSerializer(users, many=True).data
-        return Response(data=users, status=status.HTTP_200_OK)
+        return Response(data={
+            "count": count,
+            "users": users
+        }, status=status.HTTP_200_OK)
 
     def patch(self, request):
         """
