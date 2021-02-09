@@ -272,7 +272,7 @@ class UserView(APIView):
         unauthorized = serializer.validated_data['unauthorized']
         users_per_page = serializer.validated_data['users_per_page']
         page_number = serializer.validated_data['page_number']
-        users = User.nodes
+        users = User.nodes.order_by('first_name', 'last_name')
         if unauthorized:
             users = users.filter(authorized=False, role__ne='admin')
         else:

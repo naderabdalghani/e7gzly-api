@@ -1007,7 +1007,7 @@ components:
           type: string
           format: date
           description: minimum age is 16
-          example: 1998-02-28
+          example: "1998-02-28"
         gender:
           $ref: '#/components/schemas/GenderEnum'
         city:
@@ -1094,7 +1094,7 @@ components:
           $ref: '#/components/schemas/AwayTeamEnum'
         date:
           type: string
-          example: 2021-03-19T07:00:00Z
+          example: "2021-03-19T07:00:00Z"
         referee:
           type: string
           maxLength: 50
