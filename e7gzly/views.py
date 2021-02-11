@@ -154,7 +154,7 @@ class MatchDetailsView(APIView):
         except Match.DoesNotExist:
             return Response(data={"id": ["There is no match with the given id"]},
                             status=status.HTTP_404_NOT_FOUND)
-        return Response(data=MatchSerializer(match), status=status.HTTP_200_OK)
+        return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
 
 
 class StadiumView(APIView):
