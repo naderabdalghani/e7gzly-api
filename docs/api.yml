@@ -1072,12 +1072,12 @@ components:
           example: 86000
         vip_seats_per_row:
           type: integer
-          minimum: 1
+          minimum: 4
           maximum: 10
           example: 5
         vip_rows:
           type: integer
-          minimum: 1
+          minimum: 3
           maximum: 15
           example: 10
       required:
