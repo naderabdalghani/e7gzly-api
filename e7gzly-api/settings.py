@@ -83,6 +83,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'e7gzly-api.wsgi.application'
 
+# Channels
+
+ASGI_APPLICATION = "e7gzly-api.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

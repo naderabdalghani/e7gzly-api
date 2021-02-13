@@ -3,3 +3,5 @@ neomodel~=4.0.1
 djangorestframework~=3.12.2
 rest_condition~=1.0.3
 django-cors-headers~=3.7.0
+channels~=3.0.3
+asgiref~=3.3.1
