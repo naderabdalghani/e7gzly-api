@@ -15,6 +15,8 @@ from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerialize
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest, IsPatchRequest
 from django.contrib.auth.hashers import make_password, check_password
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class RegistrationView(APIView):
@@ -208,6 +210,8 @@ class ReservationView(APIView):
         user = request.user
         user.reservations.connect(seat)
         seat.match.connect(match)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(match.match_id, {"type": "update", "seat_id": seat.seat_id})
         return Response(data=SeatSerializer(seat).data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
