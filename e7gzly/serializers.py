@@ -155,11 +155,7 @@ class MatchesRetrievalSerializer(serializers.Serializer):
     page_number = serializers.IntegerField(default=1, allow_null=False)
 
 
-class UserDeletionSerializer(serializers.Serializer):
-    user = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
-
-
-class UserAuthorizationSerializer(serializers.Serializer):
+class UsernameSerializer(serializers.Serializer):
     user = serializers.CharField(required=True, allow_null=False, allow_blank=False, max_length=NAME_MAX_LEN)
 
 

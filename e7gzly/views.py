@@ -10,8 +10,8 @@ from .models import Match, Stadium, User, Token, Seat
 from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
-    IdSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UserDeletionSerializer, \
-    UserEditingSerializer, ChangePasswordSerializer, UserAuthorizationSerializer, MatchOverviewSerializer
+    IdSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UsernameSerializer, \
+    UserEditingSerializer, ChangePasswordSerializer, MatchOverviewSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest, IsPatchRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -55,7 +55,7 @@ class AuthorizationView(APIView):
         """
         Authorize a user
         """
-        serializer = UserAuthorizationSerializer(data=request.query_params)
+        serializer = UsernameSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['user']
         try:
@@ -328,7 +328,7 @@ class UserView(APIView):
         """
         Delete an existing user
         """
-        serializer = UserDeletionSerializer(data=request.query_params)
+        serializer = UsernameSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['user']
         try:
