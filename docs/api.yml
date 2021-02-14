@@ -451,17 +451,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                - $ref: '#/components/schemas/Seat'
-                - type: object
-                  properties:
-                    user:
-                      allOf:
-                      - $ref: '#/components/schemas/UserBase'
-                      - type: object
-                        properties:
-                          authorized:
-                            example: true
+                $ref: '#/components/schemas/Seat'
           description: Seat reserved.
         400:
           content:
