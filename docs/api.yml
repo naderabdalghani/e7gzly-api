@@ -1164,12 +1164,8 @@ components:
             match:
               $ref: '#/components/schemas/MatchBase'
               readOnly: true
-            user:
-              $ref: '#/components/schemas/UserBase'
-              readOnly: true
           required:
             - match
-            - user
     Stadium:
       allOf:
         - $ref: '#/components/schemas/StadiumBase'
