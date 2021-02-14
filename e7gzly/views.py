@@ -13,7 +13,7 @@ from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerialize
     IdSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UsernameSerializer, \
     UserEditingSerializer, ChangePasswordSerializer, MatchOverviewSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
-    IsUser, IsDeleteRequest, IsPatchRequest
+    IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync

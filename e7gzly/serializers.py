@@ -121,7 +121,6 @@ class StadiumSerializer(StadiumBaseSerializer):
 
 class SeatSerializer(SeatBaseSerializer):
     match = MatchBaseSerializer(read_only=True)
-    user = UserBaseSerializer(read_only=True)
 
     def to_representation(self, instance):
         instance.match = instance.match.single()
