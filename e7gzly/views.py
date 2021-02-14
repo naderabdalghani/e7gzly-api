@@ -69,8 +69,8 @@ class AuthorizationView(APIView):
 
 
 class MatchView(APIView):
-    permission_classes = [Or(IsReadOnlyRequest,
-                             And(Or(IsPostRequest, IsPutRequest), Or(And(IsManager, IsAuthorized), IsAdmin)))]
+    authentication_classes = []
+    permission_classes = []
 
     def get(self, request):
         """
@@ -90,6 +90,24 @@ class MatchView(APIView):
             matches = []
         matches = MatchOverviewSerializer(matches, many=True).data
         return Response(data=matches, status=status.HTTP_200_OK)
+
+
+class MatchDetailsView(APIView):
+    permission_classes = [Or(IsReadOnlyRequest,
+                             And(Or(IsPostRequest, IsPutRequest), Or(And(IsManager, IsAuthorized), IsAdmin)))]
+
+    def get(self, request):
+        """
+        Retrieve match details
+        """
+        serializer = IdSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        try:
+            match = Match.nodes.get(match_id=serializer.validated_data['id'].hex)
+        except Match.DoesNotExist:
+            return Response(data={"id": ["There is no match with the given id"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """
@@ -138,24 +156,6 @@ class MatchView(APIView):
         match.linesmen = serializer.validated_data['linesmen']
         match.save()
         match.match_venue.reconnect(match.match_venue.single(), stadium)
-        return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
-
-
-class MatchDetailsView(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    def get(self, request):
-        """
-        Retrieve match details
-        """
-        serializer = IdSerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        try:
-            match = Match.nodes.get(match_id=serializer.validated_data['id'].hex)
-        except Match.DoesNotExist:
-            return Response(data={"id": ["There is no match with the given id"]},
-                            status=status.HTTP_404_NOT_FOUND)
         return Response(data=MatchSerializer(match).data, status=status.HTTP_200_OK)
 
 

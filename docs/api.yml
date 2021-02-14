@@ -196,6 +196,53 @@ paths:
                 example:
                   page_number: [A valid integer is required.]
           description: Bad request. Some field is missing or doesn't comply with a logical constraint.
+  /match/:
+    get:
+      operationId: get_match_details
+      description: Retrieve match details.
+      parameters:
+      - in: query
+        name: id
+        description: Id of the match of which details may be retrieved.
+        schema:
+          type: string
+          format: uuid
+          example: 211d75a398e3473ea2bd063b680066dc
+      tags:
+      - Matches
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+          description: Retrieved match.
+        400:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  id: [This field is required]
+          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  id: [There is no match with the given id]
+          description: There is no match with the given id.
     post:
       operationId: create_match
       description: Create a new match event.<br><br> Supplied authorization token **must** be of an *authorized Manager* account.
@@ -351,53 +398,6 @@ paths:
                 example:
                   match_id: [There is no match with the given id]
           description: Given match/stadium id doesn't exist.
-  /match/:
-    get:
-      operationId: get_match_details
-      description: Retrieve match details.
-      parameters:
-      - in: query
-        name: id
-        description: Id of the match of which details may be retrieved.
-        schema:
-          type: string
-          format: uuid
-          example: 211d75a398e3473ea2bd063b680066dc
-      tags:
-      - Matches
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Match'
-          description: Retrieved match.
-        400:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  bad_field:
-                    type: array
-                    items:
-                      type: string
-                example:
-                  id: [This field is required]
-          description: Bad request. Some field is missing or doesn't comply with a logical constraint.
-        404:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  bad_field:
-                    type: array
-                    items:
-                      type: string
-                example:
-                  id: [There is no match with the given id]
-          description: There is no match with the given id.
   /reservations/:
     get:
       operationId: get_user_reservations
