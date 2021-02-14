@@ -11,7 +11,7 @@ from .constants import TICKET_CANCELLATION_WINDOW
 from .serializers import MatchSerializer, MatchBaseSerializer, UserBaseSerializer, \
     LoginDataSerializer, StadiumSerializer, StadiumBaseSerializer, SeatSerializer, SeatReservationSerializer, \
     IdSerializer, UsersRetrievalSerializer, MatchesRetrievalSerializer, UsernameSerializer, \
-    UserEditingSerializer, ChangePasswordSerializer, MatchOverviewSerializer
+    UserEditingSerializer, ChangePasswordSerializer, MatchOverviewSerializer, SeatBaseSerializer
 from .permissions import IsReadOnlyRequest, IsPostRequest, IsPutRequest, IsManager, IsAuthorized, IsAdmin, \
     IsUser, IsDeleteRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -212,7 +212,7 @@ class ReservationView(APIView):
         seat.match.connect(match)
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(match.match_id, {"type": "update", "seat_id": seat.seat_id})
-        return Response(data=SeatSerializer(seat).data, status=status.HTTP_201_CREATED)
+        return Response(data=SeatBaseSerializer(seat).data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
         """
