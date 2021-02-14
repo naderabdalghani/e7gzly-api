@@ -717,6 +717,81 @@ paths:
                     type: string
                     example: You do not have permission to perform this action.
           description: Permission denied. The supplied authorization token belongs to a non-admin user account.
+    delete:
+      operationId: delete_user
+      description: Delete an existing user.<br><br> Supplied authorization token **must** be of an *Admin* account.
+      tags:
+      - Users
+      security:
+      - TokenAuthentication: []
+      parameters:
+      - in: query
+        name: user
+        schema:
+          type: string
+          example: muhanadAtef23
+        required: true
+      responses:
+        204:
+          description: No response body.
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token.
+        403:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: You do not have permission to perform this action.
+          description: Permission denied. The supplied authorization token belongs to a non-admin user account.
+        404:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bad_field:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  user: [There is no user with the given username]
+          description: There is no user with the given username.
+  /user/:
+    get:
+      operationId: get_user_details
+      description: Retrieve user details.
+      security:
+      - TokenAuthentication: []
+      tags:
+      - Users
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBase'
+          description: Retrieved user.
+        401:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authorization credentials were not provided.
+          description: Unauthorized. Could be an invalid/missing user token.
     put:
       operationId: edit_user_profile
       description: Update user personal info.
@@ -831,56 +906,6 @@ paths:
                 example:
                   old_password: [Incorrect old password]
           description: Incorrect credentials
-    delete:
-      operationId: delete_user
-      description: Delete an existing user.<br><br> Supplied authorization token **must** be of an *Admin* account.
-      tags:
-      - Users
-      security:
-      - TokenAuthentication: []
-      parameters:
-      - in: query
-        name: user
-        schema:
-          type: string
-          example: muhanadAtef23
-        required: true
-      responses:
-        204:
-          description: No response body.
-        401:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  detail:
-                    type: string
-                    example: Authorization credentials were not provided.
-          description: Unauthorized. Could be an invalid/missing user token.
-        403:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  detail:
-                    type: string
-                    example: You do not have permission to perform this action.
-          description: Permission denied. The supplied authorization token belongs to a non-admin user account.
-        404:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  bad_field:
-                    type: array
-                    items:
-                      type: string
-                example:
-                  user: [There is no user with the given username]
-          description: There is no user with the given username.
 components:
   securitySchemes:
     TokenAuthentication:

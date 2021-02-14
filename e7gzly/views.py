@@ -263,9 +263,7 @@ class LoggingInView(ObtainAuthToken):
 
 
 class UserView(APIView):
-    permission_classes = [Or(And(IsReadOnlyRequest, IsAdmin),
-                             And(Or(IsPutRequest, IsPatchRequest), IsUser),
-                             And(IsDeleteRequest, IsAdmin))]
+    permission_classes = [IsAdmin]
 
     def get(self, request):
         """
@@ -295,6 +293,31 @@ class UserView(APIView):
             "users": users
         }, status=status.HTTP_200_OK)
 
+    def delete(self, request):
+        """
+        Delete an existing user
+        """
+        serializer = UsernameSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['user']
+        try:
+            user = User.nodes.get(username=username)
+        except User.DoesNotExist:
+            return Response(data={"user": ["There is no user with the given username"]},
+                            status=status.HTTP_404_NOT_FOUND)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserDetailsView(APIView):
+    permission_classes = [IsUser]
+
+    def get(self, request):
+        """
+        Retrieve user details
+        """
+        return Response(data=UserBaseSerializer(request.user).data, status=status.HTTP_200_OK)
+
     def patch(self, request):
         """
         Update user password
@@ -323,18 +346,3 @@ class UserView(APIView):
         user.address = serializer.validated_data.get('address', None)
         user.save()
         return Response(data=UserBaseSerializer(user).data, status=status.HTTP_200_OK)
-
-    def delete(self, request):
-        """
-        Delete an existing user
-        """
-        serializer = UsernameSerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data['user']
-        try:
-            user = User.nodes.get(username=username)
-        except User.DoesNotExist:
-            return Response(data={"user": ["There is no user with the given username"]},
-                            status=status.HTTP_404_NOT_FOUND)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
