@@ -80,7 +80,7 @@ class MatchView(APIView):
         serializer.is_valid(raise_exception=True)
         matches_per_page = serializer.validated_data['matches_per_page']
         page_number = serializer.validated_data['page_number']
-        matches = Match.nodes
+        matches = Match.nodes.filter(date__gte=timezone.now()).order_by('date')
         paginator = Paginator(matches, matches_per_page)
         try:
             matches = paginator.page(page_number)
